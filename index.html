@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCPP 1.6 Meter Values Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="1" fill="rgba(255,255,255,0.1)"/></svg>');
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .controls {
+            padding: 20px 40px;
+            background: rgba(79, 172, 254, 0.1);
+            border-bottom: 1px solid rgba(79, 172, 254, 0.2);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn.quiz {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn.quiz:hover {
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(79, 172, 254, 0.1);
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .section-header:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .section-header .toggle {
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .section-header.collapsed .toggle {
+            transform: rotate(-90deg);
+        }
+
+        .section-content {
+            padding: 30px;
+            display: block;
+        }
+
+        .section-content.collapsed {
+            display: none;
+        }
+
+        .measurand {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 5px solid #4facfe;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .measurand h3 {
+            color: #333;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .copy-btn {
+            background: rgba(79, 172, 254, 0.1);
+            border: 1px solid #4facfe;
+            color: #4facfe;
+            padding: 5px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #4facfe;
+            color: white;
+        }
+
+        .measurand p {
+            margin-bottom: 12px;
+            color: #555;
+            font-size: 1rem;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, rgba(79, 172, 254, 0.1) 0%, rgba(0, 242, 254, 0.1) 100%);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 3px solid #4facfe;
+        }
+
+        .units {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .units h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .unit-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .unit-item:last-child {
+            border-bottom: none;
+        }
+
+        .unit-name {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .unit-desc {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .overview-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(79, 172, 254, 0.2);
+        }
+
+        .overview-card h3 {
+            color: #4facfe;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .controls {
+                padding: 15px 20px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.8rem;
+            }
+            
+            .section-content {
+                padding: 20px;
+            }
+            
+            .measurand {
+                padding: 20px;
+            }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #4facfe;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚡ OCPP 1.6 Meter Values Guide</h1>
+            <p>Understanding Electric Vehicle Charging Communication</p>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="expandAll()">📖 Expand All Sections</button>
+            <button class="btn" onclick="collapseAll()">📕 Collapse All Sections</button>
+            <a href="quiz.html" class="btn quiz">🧠 Test Your Knowledge - Quiz</a>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>🔍 What are Meter Values?</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="overview-grid">
+                        <div class="overview-card">
+                            <span class="icon">📊</span>
+                            <h3>Definition</h3>
+                            <p>A meter value is like a report card that an electric car charger sends to a central management system. Just like your electricity meter at home tells the power company how much electricity you've used.</p>
+                        </div>
+                        <div class="overview-card">
+                            <span class="icon">⏰</span>
+                            <h3>When Sent</h3>
+                            <p>• During charging (can be every few seconds to minutes)<br>• When charging starts<br>• When charging stops<br>• On management system request</p>
+                        </div>
+                        <div class="overview-card">
+                            <span class="icon">🎯</span>
+                            <h3>Purpose</h3>
+                            <p>• <strong>Customer billing:</strong> Calculate exact energy consumed and costs<br>• <strong>Safety monitoring:</strong> Ensure voltage, current, and temperature stay within safe limits<br>• <strong>Energy management:</strong> Track total consumption across multiple chargers for grid optimization<br>• <strong>Problem diagnostics:</strong> Detect equipment malfunctions through abnormal readings<br>• <strong>Legal compliance:</strong> Meet regulatory requirements for energy measurement and reporting</p>
+                        </div>
+                        <div class="overview-card">
+                            <span class="icon">📋</span>
+                            <h3>Information Included</h3>
+                            <p>• Timestamp<br>• Measurement type<br>• Actual value<br>• Unit of measurement<br>• Location & phase</p>
+                        </div>
+                    </div>
+                    <div class="highlight" style="margin-top: 30px;">
+                        <h3 style="color: #4facfe; margin-bottom: 15px;">📄 Example: Meter Value JSON Event</h3>
+                        <p style="margin-bottom: 15px;">Here's what an actual meter value message looks like when sent from a charger to the management system:</p>
+                        <pre style="background: rgba(0,0,0,0.05); padding: 20px; border-radius: 8px; overflow-x: auto; font-family: 'Courier New', monospace; line-height: 1.4; border-left: 4px solid #4facfe;"><code>{
+  "messageType": "MeterValues",
+  "connectorId": 1,
+  "transactionId": 12345,
+  "meterValue": [
+    {
+      "timestamp": "2025-07-31T14:30:00.000Z",
+      "sampledValue": [
+        {
+          "value": "15.75",
+          "context": "Sample.Periodic",
+          "measurand": "Energy.Active.Import.Register",
+          "unit": "kWh",
+          "location": "Outlet",
+          "phase": "L1-N"
+        },
+        {
+          "value": "85",
+          "context": "Sample.Periodic", 
+          "measurand": "SoC",
+          "unit": "Percent",
+          "location": "EV"
+        },
+        {
+          "value": "32.5",
+          "context": "Sample.Periodic",
+          "measurand": "Current.Import", 
+          "unit": "A",
+          "location": "Outlet",
+          "phase": "L1"
+        },
+        {
+          "value": "230.2",
+          "context": "Sample.Periodic",
+          "measurand": "Voltage",
+          "unit": "V", 
+          "location": "Outlet",
+          "phase": "L1-N"
+        },
+        {
+          "value": "7.5",
+          "context": "Sample.Periodic",
+          "measurand": "Power.Active.Import",
+          "unit": "kW",
+          "location": "Outlet"
+        },
+        {
+          "value": "45.2",
+          "context": "Sample.Periodic",
+          "measurand": "Temperature",
+          "unit": "Celsius",
+          "location": "Cable"
+        }
+      ]
+    }
+  ]
+}</code></pre>
+                        <div style="margin-top: 15px; padding: 15px; background: rgba(79, 172, 254, 0.1); border-radius: 8px;">
+                            <p style="margin: 0; font-size: 0.9rem;"><strong>What this means:</strong> At 2:30 PM on July 31st, 2025, the charger reported that it has delivered 15.75 kWh of energy to a car that's now 85% charged, currently drawing 32.5 amps at 230.2 volts (7.5 kW power), with the cable temperature at 45.2°C.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>⚡ Energy.Active.Import.Register</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="measurand">
+                        <h3>Total Energy Consumption <button class="copy-btn" onclick="copyText('Energy.Active.Import.Register')">📋 Copy</button></h3>
+                        <p><strong>What it is:</strong> This measures the total amount of electrical energy that has flowed into the car's battery.</p>
+                        <div class="highlight">
+                            <p><strong>Simple explanation:</strong> Think of this like the odometer in your car - it keeps track of the total distance you've driven. This measurand keeps track of the total energy that has been "driven" into your car's battery since charging started.</p>
+                            <p><strong>Real-world example:</strong> If you fill up a bucket with water using a hose, this would measure the total gallons of water that went into the bucket from when you started filling it.</p>
+                        </div>
+                        <div class="units">
+                            <h4>Common Units:</h4>
+                            <div class="unit-item">
+                                <span class="unit-name">Wh (Watt-hours)</span>
+                                <span class="unit-desc">For measuring small amounts of energy</span>
+                            </div>
+                            <div class="unit-item">
+                                <span class="unit-name">kWh (Kilowatt-hours)</span>
+                                <span class="unit-desc">Most common - what you see on electricity bills</span>
+                            </div>
+                            <div class="unit-item">
+                                <span class="unit-name">MWh (Megawatt-hours)</span>
+                                <span class="unit-desc">For very large amounts (rarely used)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>🔋 SoC (State of Charge)</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="measurand">
+                        <h3>Battery Level Indicator <button class="copy-btn" onclick="copyText('SoC (State of Charge)')">📋 Copy</button></h3>
+                        <p><strong>What it is:</strong> This shows how "full" the car's battery is, as a percentage.</p>
+                        <div class="highlight">
+                            <p><strong>Simple explanation:</strong> This is exactly like the battery indicator on your phone or laptop. When your phone shows 50% battery, that's its State of Charge.</p>
+                            <p><strong>Real-world example:</strong> If your car battery is like a gas tank, SoC tells you how full the tank is. 0% = completely empty, 100% = completely full, 50% = half full.</p>
+                        </div>
+                        <div class="units">
+                            <h4>Common Units:</h4>
+                            <div class="unit-item">
+                                <span class="unit-name">% (Percent)</span>
+                                <span class="unit-desc">Always shown as percentage from 0% to 100%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>🌊 Current.Import</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="measurand">
+                        <h3>Electrical Flow Rate <button class="copy-btn" onclick="copyText('Current.Import')">📋 Copy</button></h3>
+                        <p><strong>What it is:</strong> This measures the electrical current (flow of electricity) going into the car's battery right now.</p>
+                        <div class="highlight">
+                            <p><strong>Simple explanation:</strong> Think of electricity like water flowing through a pipe. Current is how fast the water (electricity) is flowing. More current = faster charging, just like more water flow = faster filling of a bucket.</p>
+                            <p><strong>Real-world example:</strong> If electricity is like water, current is like measuring "gallons per minute" flowing through your garden hose. Higher current means electricity is flowing faster into the car.</p>
+                        </div>
+                        <div class="units">
+                            <h4>Common Units:</h4>
+                            <div class="unit-item">
+                                <span class="unit-name">A (Amperes or Amps)</span>
+                                <span class="unit-desc">Standard unit for electrical current</span>
+                            </div>
+                            <div class="unit-item">
+                                <span class="unit-name">mA (Milliamperes)</span>
+                                <span class="unit-desc">For very small currents (1/1000 of an amp)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>⚡ Voltage</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="measurand">
+                        <h3>Electrical Pressure <button class="copy-btn" onclick="copyText('Voltage')">📋 Copy</button></h3>
+                        <p><strong>What it is:</strong> This measures the electrical "pressure" that pushes the electricity into the car's battery.</p>
+                        <div class="highlight">
+                            <p><strong>Simple explanation:</strong> If electricity is like water, voltage is like water pressure. Higher pressure pushes water through pipes faster. Higher voltage pushes electricity through wires more effectively.</p>
+                            <p><strong>Real-world example:</strong> It's like the pressure in your home's water system. Low pressure = weak shower, high pressure = strong shower. Low voltage = slow charging, higher voltage = more efficient charging.</p>
+                        </div>
+                        <div class="units">
+                            <h4>Common Units:</h4>
+                            <div class="unit-item">
+                                <span class="unit-name">V (Volts)</span>
+                                <span class="unit-desc">Standard unit for electrical pressure</span>
+                            </div>
+                            <div class="unit-item">
+                                <span class="unit-name">kV (Kilovolts)</span>
+                                <span class="unit-desc">For very high voltages (1000 volts)</span>
+                            </div>
+                            <div class="unit-item">
+                                <span class="unit-name">mV (Millivolts)</span>
+                                <span class="unit-desc">For very low voltages (1/1000 of a volt)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>🔥 Power.Active.Import</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="measurand">
+                        <h3>Energy Transfer Speed <button class="copy-btn" onclick="copyText('Power.Active.Import')">📋 Copy</button></h3>
+                        <p><strong>What it is:</strong> This measures how much electrical power is flowing into the car's battery right now.</p>
+                        <div class="highlight">
+                            <p><strong>Simple explanation:</strong> Power is like the "speed" of energy transfer. It combines both the flow (current) and pressure (voltage) to tell you how quickly energy is being delivered to the car.</p>
+                            <p><strong>Real-world example:</strong> If charging a car is like filling a swimming pool with water, power tells you how fast the pool is filling up. It considers both how much water is flowing (current) and how much pressure is behind it (voltage).</p>
+                        </div>
+                        <div class="units">
+                            <h4>Common Units:</h4>
+                            <div class="unit-item">
+                                <span class="unit-name">W (Watts)</span>
+                                <span class="unit-desc">Basic unit of power</span>
+                            </div>
+                            <div class="unit-item">
+                                <span class="unit-name">kW (Kilowatts)</span>
+                                <span class="unit-desc">Most common for car charging (1000 watts)</span>
+                            </div>
+                            <div class="unit-item">
+                                <span class="unit-name">MW (Megawatts)</span>
+                                <span class="unit-desc">For very high power (rarely used for individual cars)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>🌡️ Temperature</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="measurand">
+                        <h3>Heat Monitoring <button class="copy-btn" onclick="copyText('Temperature')">📋 Copy</button></h3>
+                        <p><strong>What it is:</strong> This measures how hot different parts of the charging station are.</p>
+                        <div class="highlight">
+                            <p><strong>Simple explanation:</strong> Just like checking if your phone is getting too hot while charging, the charging station monitors its own temperature to make sure it's not overheating.</p>
+                            <p><strong>Real-world example:</strong> It's like having a thermometer in different parts of the charger - the cable, the connector, internal electronics - to make sure nothing gets dangerously hot, like checking if your car engine is overheating.</p>
+                        </div>
+                        <div class="units">
+                            <h4>Common Units:</h4>
+                            <div class="unit-item">
+                                <span class="unit-name">°C (Degrees Celsius)</span>
+                                <span class="unit-desc">Most common worldwide (0°C = freezing, 100°C = boiling)</span>
+                            </div>
+                            <div class="unit-item">
+                                <span class="unit-name">°F (Degrees Fahrenheit)</span>
+                                <span class="unit-desc">Used in United States (32°F = freezing, 212°F = boiling)</span>
+                            </div>
+                            <div class="unit-item">
+                                <span class="unit-name">K (Kelvin)</span>
+                                <span class="unit-desc">Scientific unit (rarely used in practical applications)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>📚 Summary</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="highlight">
+                        <p><strong>Key Takeaway:</strong> Meter values are essential reports that help ensure safe, efficient, and properly billed electric vehicle charging. They're like having a smart assistant constantly monitoring and reporting on the charging process, making sure everything works correctly and customers are charged fairly for the energy they use.</p>
+                    </div>
+                    <div class="overview-grid">
+                        <div class="overview-card">
+                            <span class="icon">✅</span>
+                            <h3>What We Learned</h3>
+                            <p>• Meter values are communication reports<br>• They ensure safety and proper billing<br>• 6 key measurands monitor different aspects<br>• Simple analogies help understand complex concepts</p>
+                        </div>
+                        <div class="overview-card">
+                            <span class="icon">🎯</span>
+                            <h3>Next Steps</h3>
+                            <p>• Apply this knowledge to OCPP implementations<br>• Use these explanations with stakeholders<br>• Reference specific measurands as needed<br>• <strong>🧠 Take the quiz to test your understanding!</strong></p>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 30px;">
+                        <a href="quiz.html" class="btn quiz" style="font-size: 1.1rem; padding: 15px 30px;">
+                            🧠 Ready to Test Your Knowledge? Take the Quiz! 
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">
+        Copied to clipboard! ✅
+    </div>
+
+    <script>
+        function toggleSection(header) {
+            const content = header.nextElementSibling;
+            const toggle = header.querySelector('.toggle');
+            
+            header.classList.toggle('collapsed');
+            content.classList.toggle('collapsed');
+        }
+
+        function expandAll() {
+            const headers = document.querySelectorAll('.section-header');
+            const contents = document.querySelectorAll('.section-content');
+            
+            headers.forEach(header => header.classList.remove('collapsed'));
+            contents.forEach(content => content.classList.remove('collapsed'));
+        }
+
+        function collapseAll() {
+            const headers = document.querySelectorAll('.section-header');
+            const contents = document.querySelectorAll('.section-content');
+            
+            headers.forEach(header => header.classList.add('collapsed'));
+            contents.forEach(content => content.classList.add('collapsed'));
+        }
+
+        function copyText(measurandName) {
+            const section = event.target.closest('.section');
+            const sectionTitle = section.querySelector('.section-header h2').textContent;
+            const copyText = `${sectionTitle} - ${measurandName}`;
+            
+            navigator.clipboard.writeText(copyText).then(() => {
+                showToast();
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = copyText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast();
+            });
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Initialize with all sections expanded
+        document.addEventListener('DOMContentLoaded', () => {
+            expandAll();
+        });
+    </script>
+</body>
+</html>
