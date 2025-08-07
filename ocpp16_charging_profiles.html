@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCPP 1.6 Set Charging Profile Events Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="1" fill="rgba(255,255,255,0.1)"/></svg>');
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .controls {
+            padding: 20px 40px;
+            background: rgba(79, 172, 254, 0.1);
+            border-bottom: 1px solid rgba(79, 172, 254, 0.2);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn.home {
+            background: linear-gradient(135deg, #4ffec9 0%, #00fe4c 100%);
+            color: white;
+            border: black;
+            border-width: 1px;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-shadow: #333;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn.home:hover{
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 254, 146, 0.4);
+        }
+
+        .btn.quiz {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn.quiz:hover {
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(79, 172, 254, 0.1);
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .section-header:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .section-header .toggle {
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .section-header.collapsed .toggle {
+            transform: rotate(-90deg);
+        }
+
+        .section-content {
+            padding: 30px;
+            display: block;
+        }
+
+        .section-content.collapsed {
+            display: none;
+        }
+
+        .profile-type {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 5px solid #4facfe;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .profile-type.default {
+            border-left-color: #e74c3c;
+        }
+
+        .profile-type h3 {
+            color: #333;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .copy-btn {
+            background: rgba(79, 172, 254, 0.1);
+            border: 1px solid #4facfe;
+            color: #4facfe;
+            padding: 5px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #4facfe;
+            color: white;
+        }
+
+        .profile-type p {
+            margin-bottom: 12px;
+            color: #555;
+            font-size: 1rem;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, rgba(79, 172, 254, 0.1) 0%, rgba(0, 242, 254, 0.1) 100%);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 3px solid #4facfe;
+        }
+
+        .units {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .units h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .unit-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .unit-item:last-child {
+            border-bottom: none;
+        }
+
+        .unit-name {
+            font-weight: 600;
+            color: #667eea;
+            flex: 0 0 auto;
+            margin-bottom: 5px;
+        }
+
+        .unit-desc {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            flex: 1;
+            padding-left: 10px;
+        }
+
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .overview-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(79, 172, 254, 0.2);
+        }
+
+        .overview-card h3 {
+            color: #4facfe;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .comparison-table {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            overflow-x: auto;
+        }
+
+        .comparison-table table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(79, 172, 254, 0.1);
+        }
+
+        .comparison-table th {
+            background: rgba(79, 172, 254, 0.1);
+            color: #333;
+            font-weight: 600;
+        }
+
+        .comparison-table tr:hover {
+            background: rgba(79, 172, 254, 0.05);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 5px;
+                border-radius: 15px;
+                max-width: 100%;
+            }
+            
+            .header {
+                padding: 20px 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+                line-height: 1.2;
+                word-wrap: break-word;
+            }
+            
+            .header p {
+                font-size: 1rem;
+                word-wrap: break-word;
+            }
+            
+            .content {
+                padding: 15px;
+            }
+            
+            .controls {
+                padding: 10px;
+                gap: 10px;
+            }
+            
+            .btn {
+                padding: 8px 15px;
+                font-size: 0.8rem;
+                word-wrap: break-word;
+                min-width: auto;
+                white-space: normal;
+            }
+            
+            .section-header h2 {
+                font-size: 1.0rem;
+            }
+
+            .section-content {
+                padding: 15px;
+            }
+            
+            .profile-type {
+                padding: 15px;
+            }
+            
+            .profile-type h3 {
+                font-size: 1.1rem;
+                line-height: 1.3;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .copy-btn {
+                align-self: flex-end;
+            }
+            
+            .overview-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .overview-card {
+                padding: 20px;
+            }
+            
+            .overview-card h3 {
+                font-size: 1.1rem;
+            }
+            
+            pre {
+                font-size: 0.7rem !important;
+                overflow-x: auto !important;
+                white-space: pre !important;
+                word-wrap: normal !important;
+            }
+            
+            .unit-item {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 15px 0;
+                gap: 8px;
+            }
+            
+            .unit-desc {
+                margin-top: 5px;
+                font-size: 0.8rem;
+                padding-left: 0;
+                line-height: 1.4;
+            }
+
+            .comparison-table {
+                font-size: 0.8rem;
+            }
+
+            .comparison-table th,
+            .comparison-table td {
+                padding: 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                margin: 3px;
+                padding: 0;
+            }
+            
+            .header h1 {
+                font-size: 1.6rem;
+            }
+            
+            .content {
+                padding: 10px;
+            }
+            
+            .section-header h2 {
+                font-size: 0.85rem;
+            }
+            
+            .section-content {
+                padding: 10px;
+            }
+            
+            .profile-type {
+                padding: 12px;
+            }
+            
+            .btn {
+                font-size: 0.7rem;
+                padding: 6px 12px;
+            }
+            
+            pre {
+                font-size: 0.6rem !important;
+                padding: 10px !important;
+            }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #4facfe;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 OCPP 1.6 Set Charging Profile Events</h1>
+            <p>Understanding Remote Charging Control & Scheduling</p>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="expandAll()">📖 Expand All Sections</button>
+            <button class="btn" onclick="collapseAll()">📕 Collapse All Sections</button>
+            <a href="charging_profiles_quiz.html" class="btn quiz">🧠 Test Your Knowledge - Quiz</a>
+            <a href="index.html" class="btn home">🏠 Back to Manu</a>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>🎛️ What are Set Charging Profile Events?</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="overview-grid">
+                        <div class="overview-card">
+                            <span class="icon">🎯</span>
+                            <h3>Definition</h3>
+                            <p>Set Charging Profile events are like <strong>remote control commands</strong> that the management system sends to chargers. Think of them as detailed instructions - like programming your home thermostat or setting timers on your coffee maker.</p>
+                        </div>
+                        <div class="overview-card">
+                            <span class="icon">📅</span>
+                            <h3>What They Control</h3>
+                            <p>• <strong>When to charge:</strong> Specific time schedules<br>• <strong>How fast to charge:</strong> Power limits during different periods<br>• <strong>Which connector:</strong> Specific charging ports<br>• <strong>How long:</strong> Duration and validity periods</p>
+                        </div>
+                        <div class="overview-card">
+                            <span class="icon">🚀</span>
+                            <h3>Real-World Benefits</h3>
+                            <p>• <strong>Cost savings:</strong> Charge during cheaper electricity hours<br>• <strong>Grid protection:</strong> Prevent electrical overloads<br>• <strong>Customer control:</strong> Honor specific charging preferences<br>• <strong>Safety compliance:</strong> Stay within electrical limits</p>
+                        </div>
+                        <div class="overview-card">
+                            <span class="icon">⚡</span>
+                            <h3>Two Main Types</h3>
+                            <p>• <strong>TxProfile:</strong> Rules for specific charging sessions<br>• <strong>TxDefaultProfile:</strong> Default rules for all future sessions<br>• <strong>Priority system:</strong> Specific rules override defaults<br>• <strong>Flexible scheduling:</strong> Daily, weekly, or one-time patterns</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>📋 TxProfile</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="profile-type">
+                        <h3>Specific Session Rules <button class="copy-btn" onclick="copyText('TxProfile')">📋 Copy</button></h3>
+                        <p><strong>What it is:</strong> Like giving a charger a <strong>personalized schedule</strong> for a specific charging session. Similar to setting a custom alarm schedule on your phone for different days.</p>
+                        
+                        <div class="highlight">
+                            <h4 style="color: #4facfe; margin-bottom: 10px;">⏰ When System Sends It:</h4>
+                            <p>• <strong>When a car plugs in</strong> - Specific charging rules for that session<br>
+                            • <strong>During peak hours</strong> - Limit power when electricity is expensive<br>
+                            • <strong>For scheduled charging</strong> - Customer wants specific charging times<br>
+                            • <strong>Emergency situations</strong> - Reduce power consumption immediately<br>
+                            • <strong>Load balancing</strong> - Distribute power among multiple cars</p>
+                        </div>
+
+                        <div class="highlight">
+                            <h4 style="color: #4facfe; margin-bottom: 10px;">🎯 Why It Sends It:</h4>
+                            <p>• <strong>Cost management:</strong> Charge during cheaper hours<br>
+                            • <strong>Grid protection:</strong> Prevent electrical system overload<br>
+                            • <strong>Customer preferences:</strong> Honor specific schedules<br>
+                            • <strong>Energy optimization:</strong> Use renewable energy when available<br>
+                            • <strong>Safety compliance:</strong> Stay within electrical limits</p>
+                        </div>
+
+                        <div class="highlight" style="margin-top: 30px;">
+                            <h3 style="color: #4facfe; margin-bottom: 15px;">📄 Example: TxProfile JSON Event</h3>
+                            <p style="margin-bottom: 15px;">Here's what a specific charging session profile looks like:</p>
+                            <pre style="background: rgba(0,0,0,0.05); padding: 20px; border-radius: 8px; overflow-x: auto; font-family: 'Courier New', monospace; line-height: 1.4; border-left: 4px solid #4facfe;"><code>{
+  "connectorId": 1,
+  "csChargingProfiles": {
+    "chargingProfileId": 12345,
+    "transactionId": 67890,
+    "stackLevel": 1,
+    "chargingProfilePurpose": "TxProfile",
+    "chargingProfileKind": "Absolute",
+    "recurrencyKind": "Daily",
+    "validFrom": "2025-08-07T06:00:00.000Z",
+    "validTo": "2025-08-08T06:00:00.000Z",
+    "chargingSchedule": {
+      "duration": 86400,
+      "startSchedule": "2025-08-07T06:00:00.000Z",
+      "chargingRateUnit": "A",
+      "chargingSchedulePeriod": [
+        {
+          "startPeriod": 0,
+          "limit": 32.0,
+          "numberPhases": 3
+        },
+        {
+          "startPeriod": 14400,
+          "limit": 16.0,
+          "numberPhases": 3
+        },
+        {
+          "startPeriod": 72000,
+          "limit": 32.0,
+          "numberPhases": 3
+        }
+      ]
+    }
+  }
+}</code></pre>
+                            <div style="margin-top: 15px; padding: 15px; background: rgba(79, 172, 254, 0.1); border-radius: 8px;">
+                                <p style="margin: 0; font-size: 0.9rem;"><strong>What this means:</strong> "For charging port 1, from 6 AM to 10 AM charge at full power (32A), from 10 AM to 2 AM next day charge at half power (16A), then from 2 AM to 6 AM charge at full power again. This is for transaction #67890 and repeats daily."</p>
+                            </div>
+                        </div>
+
+                        <div class="units">
+                            <h4>Field Explanations:</h4>
+                            <div class="unit-item">
+                                <span class="unit-name">connectorId: 1</span>
+                                <span class="unit-desc">Applies to charging port #1 (like specifying "bedroom outlet")</span>
+                            </div>
+                            <div class="unit-item">
+                                <span class="unit-name">chargingProfileId: 12345</span>
+                                <span class="unit-desc">Unique ID for this charging rule (like a recipe number)</span>
+                            </div>
+                            <div class="unit-item">
+                                <span class="unit-name">transactionId: 67890</span>
+                                <span class="unit-desc">Links to specific charging session (like a parking ticket number)</span>
+                            </div>
+                            <div class="unit-item">
+                                <span class="unit-name">stackLevel: 1</span>
+                                <span class="unit-desc">High priority (lower numbers = higher priority)</span>
+                            </div>
+                            <div class="unit-item">
+                                <span class="unit-name">chargingRateUnit: "A"</span>
+                                <span class="unit-desc">Power limits in Amperes (electrical current)</span>
+                            </div>
+                            <div class="unit-item">
+                                <span class="unit-name">startPeriod: 0, 14400, 72000</span>
+                                <span class="unit-desc">Time periods in seconds (0=6AM, 14400=10AM, 72000=2AM next day)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>🔧 TxDefaultProfile</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="profile-type default">
+                        <h3>Default Rules for All Sessions <button class="copy-btn" onclick="copyText('TxDefaultProfile')">📋 Copy</button></h3>
+                        <p><strong>What it is:</strong> Like setting <strong>default rules</strong> for a charging station that apply to ALL future sessions, unless overridden. It's like setting your home thermostat to a default schedule that applies every day.</p>
+                        
+                        <div class="highlight">
+                            <h4 style="color: #4facfe; margin-bottom: 10px;">⏰ When System Sends It:</h4>
+                            <p>• <strong>During station setup</strong> - Configuring new charging station<br>
+                            • <strong>Policy updates</strong> - Site owner changes rules for all users<br>
+                            • <strong>Time-of-use changes</strong> - Electricity rate schedules change<br>
+                            • <strong>Load management updates</strong> - Building electrical limits change<br>
+                            • <strong>Maintenance periods</strong> - Reduced charging during maintenance</p>
+                        </div>
+
+                        <div class="highlight">
+                            <h4 style="color: #4facfe; margin-bottom: 10px;">🎯 Why It Sends It:</h4>
+                            <p>• <strong>Consistent behavior:</strong> All sessions follow same basic rules<br>
+                            • <strong>Site-wide policies:</strong> Building-specific charging limits<br>
+                            • <strong>Default cost optimization:</strong> Standard time-of-use schedules<br>
+                            • <strong>Safety defaults:</strong> Conservative power limits as fallback<br>
+                            • <strong>Simplified management:</strong> One rule for everyone</p>
+                        </div>
+
+                        <div class="highlight" style="margin-top: 30px;">
+                            <h3 style="color: #4facfe; margin-bottom: 15px;">📄 Example: TxDefaultProfile JSON Event</h3>
+                            <p style="margin-bottom: 15px;">Here's what a default profile for all charging sessions looks like:</p>
+                            <pre style="background: rgba(0,0,0,0.05); padding: 20px; border-radius: 8px; overflow-x: auto; font-family: 'Courier New', monospace; line-height: 1.4; border-left: 4px solid #e74c3c;"><code>{
+  "connectorId": 0,
+  "csChargingProfiles": {
+    "chargingProfileId": 99999,
+    "stackLevel": 5,
+    "chargingProfilePurpose": "TxDefaultProfile",
+    "chargingProfileKind": "Recurring",
+    "recurrencyKind": "Weekly",
+    "validFrom": "2025-08-07T00:00:00.000Z",
+    "chargingSchedule": {
+      "duration": 604800,
+      "startSchedule": "2025-08-07T00:00:00.000Z",
+      "chargingRateUnit": "kW",
+      "chargingSchedulePeriod": [
+        {
+          "startPeriod": 0,
+          "limit": 7.4,
+          "numberPhases": 1
+        },
+        {
+          "startPeriod": 32400,
+          "limit": 3.7,
+          "numberPhases": 1
+        },
+        {
+          "startPeriod": 64800,
+          "limit": 7.4,
+          "numberPhases": 1
+        }
+      ]
+    }
+  }
+}</code></pre>
+                            <div style="margin-top: 15px; padding: 15px; background: rgba(231, 76, 60, 0.1); border-radius: 8px;">
+                                <p style="margin: 0; font-size: 0.9rem;"><strong>What this means:</strong> "For all charging ports, by default: charge at full power (7.4kW) from midnight to 9 AM, reduce to half power (3.7kW) from 9 AM to 6 PM, then back to full power from 6 PM to midnight. Repeat this pattern every week."</p>
+                            </div>
+                        </div>
+
+                        <div class="units">
+                            <h4>Field Explanations:</h4>
+                            <div class="unit-item">
+                                <span class="unit-name">connectorId: 0</span>
+                                <span class="unit-desc">Applies to ALL connectors (0 means "all ports")</span>
+                            </div>
+                            <div class="unit-item">
+                                <span class="unit-name">stackLevel: 5</span>
+                                <span class="unit-desc">Lower priority - can be overridden by specific profiles</span>
+                            </div>
+                            <div class="unit-item">
+                                <span class="unit-name">chargingProfilePurpose: "TxDefaultProfile"</span>
+                                <span class="unit-desc">Default profile for all transactions</span>
+                            </div>
+                            <div class="unit-item">
+                                <span class="unit-name">chargingRateUnit: "kW"</span>
+                                <span class="unit-desc">Power limits in Kilowatts (power unit)</span>
+                            </div>
+                            <div class="unit-item">
+                                <span class="unit-name">duration: 604800</span>
+                                <span class="unit-desc">Schedule lasts 604,800 seconds (7 days/1 week)</span>
+                            </div>
+                            <div class="unit-item">
+                                <span class="unit-name">No transactionId</span>
+                                <span class="unit-desc">Applies to all future transactions, not specific ones</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>🔄 Key Differences Comparison</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="comparison-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Aspect</th>
+                                    <th>TxProfile</th>
+                                    <th>TxDefaultProfile</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Scope</strong></td>
+                                    <td>Specific charging session</td>
+                                    <td>All future charging sessions</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Priority</strong></td>
+                                    <td>High (typically stackLevel 1-2)</td>
+                                    <td>Low (typically stackLevel 5-9)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Duration</strong></td>
+                                    <td>Short-term (hours to days)</td>
+                                    <td>Long-term (weeks to permanent)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Override Capability</strong></td>
+                                    <td>Cannot be overridden by defaults</td>
+                                    <td>Can be overridden by specific profiles</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Transaction ID</strong></td>
+                                    <td>Has specific transactionId</td>
+                                    <td>No transactionId (applies to all)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Connector ID</strong></td>
+                                    <td>Usually specific connector (1,2,3...)</td>
+                                    <td>Often 0 (all connectors)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Use Case</strong></td>
+                                    <td>"This charging session only"</td>
+                                    <td>"All sessions unless told otherwise"</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Everyday Analogy</strong></td>
+                                    <td>Setting a one-time alarm</td>
+                                    <td>Setting your default alarm schedule</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>📊 Possible Units & Values</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="overview-grid">
+                        <div class="overview-card">
+                            <span class="icon">⚡</span>
+                            <h3>chargingRateUnit Options</h3>
+                            <div class="units">
+                                <div class="unit-item">
+                                    <span class="unit-name">"A" (Amperes)</span>
+                                    <span class="unit-desc">Electrical current flow - like gallons per minute through a hose. Values: 6A, 16A, 32A, 63A</span>
+                                </div>
+                                <div class="unit-item">
+                                    <span class="unit-name">"kW" (Kilowatts)</span>
+                                    <span class="unit-desc">Electrical power - like horsepower for electrical devices. Values: 3.7kW, 7.4kW, 11kW, 22kW, 50kW</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="overview-card">
+                            <span class="icon">🔌</span>
+                            <h3>numberPhases Options</h3>
+                            <div class="units">
+                                <div class="unit-item">
+                                    <span class="unit-name">1</span>
+                                    <span class="unit-desc">Single-phase power (like most home outlets)</span>
+                                </div>
+                                <div class="unit-item">
+                                    <span class="unit-name">3</span>
+                                    <span class="unit-desc">Three-phase power (industrial/commercial for faster charging)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="overview-card">
+                            <span class="icon">🕐</span>
+                            <h3>Time Values (All in Seconds)</h3>
+                            <div class="units">
+                                <div class="unit-item">
+                                    <span class="unit-name">startPeriod</span>
+                                    <span class="unit-desc">Seconds from schedule start (0 = start time, 3600 = 1 hour later)</span>
+                                </div>
+                                <div class="unit-item">
+                                    <span class="unit-name">duration</span>
+                                    <span class="unit-desc">Total seconds for schedule (86400 = 24 hours, 604800 = 1 week)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="overview-card">
+                            <span class="icon">🎯</span>
+                            <h3>stackLevel (Priority)</h3>
+                            <div class="units">
+                                <div class="unit-item">
+                                    <span class="unit-name">1-3</span>
+                                    <span class="unit-desc">High priority (specific session rules)</span>
+                                </div>
+                                <div class="unit-item">
+                                    <span class="unit-name">4-6</span>
+                                    <span class="unit-desc">Medium priority (site-specific rules)</span>
+                                </div>
+                                <div class="unit-item">
+                                    <span class="unit-name">7-9</span>
+                                    <span class="unit-desc">Low priority (default/fallback rules)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>📚 Summary</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="highlight">
+                        <p><strong>Key Takeaway:</strong> Charging profiles are like programmable timers that control when and how fast electric vehicles charge. <strong>TxProfile</strong> gives specific instructions for individual sessions, while <strong>TxDefaultProfile</strong> sets standard rules for all charging unless specifically overridden.</p>
+                    </div>
+                    <div class="overview-grid">
+                        <div class="overview-card">
+                            <span class="icon">✅</span>
+                            <h3>What We Learned</h3>
+                            <p>• Charging profiles control when and how fast EVs charge<br>• Two main types: specific session vs default rules<br>• Priority system allows overrides<br>• Time-based power scheduling saves costs and protects grid</p>
+                        </div>
+                        <div class="overview-card">
+                            <span class="icon">🎯</span>
+                            <h3>Think of It Like</h3>
+                            <p>• <strong>TxProfile:</strong> "For this customer today, charge at these specific times"<br>• <strong>TxDefaultProfile:</strong> "Unless told otherwise, always follow this standard schedule"<br>• Like the difference between a one-time alarm and your default alarm schedule</p>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 30px;">
+                        <a href="charging_profiles_quiz.html" class="btn quiz" style="font-size: 1.1rem; padding: 15px 30px;">
+                            🧠 Ready to Test Your Knowledge? Take the Quiz! 
+                        </a>
+                        <a href="index.html" class="btn home">🏠 Back to Manu</a>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">
+        Copied to clipboard! ✅
+    </div>
+
+    <script>
+        function toggleSection(header) {
+            const content = header.nextElementSibling;
+            const toggle = header.querySelector('.toggle');
+            
+            header.classList.toggle('collapsed');
+            content.classList.toggle('collapsed');
+        }
+
+        function expandAll() {
+            const headers = document.querySelectorAll('.section-header');
+            const contents = document.querySelectorAll('.section-content');
+            
+            headers.forEach(header => header.classList.remove('collapsed'));
+            contents.forEach(content => content.classList.remove('collapsed'));
+        }
+
+        function collapseAll() {
+            const headers = document.querySelectorAll('.section-header');
+            const contents = document.querySelectorAll('.section-content');
+            
+            headers.forEach(header => header.classList.add('collapsed'));
+            contents.forEach(content => content.classList.add('collapsed'));
+        }
+
+        function copyText(profileType) {
+            const section = event.target.closest('.section');
+            const sectionTitle = section.querySelector('.section-header h2').textContent;
+            const copyText = `${sectionTitle} - ${profileType}`;
+            
+            navigator.clipboard.writeText(copyText).then(() => {
+                showToast();
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = copyText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast();
+            });
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Initialize with all sections collapsed
+        document.addEventListener('DOMContentLoaded', () => {
+            collapseAll();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCPP 1.6 Set Charging Profile Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .quiz-info {
+            background: rgba(79, 172, 254, 0.1);
+            padding: 20px 40px;
+            text-align: center;
+            border-bottom: 1px solid rgba(79, 172, 254, 0.2);
+        }
+
+        .quiz-info p {
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .quiz-content {
+            padding: 40px;
+        }
+
+        .question {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #4facfe;
+        }
+
+        .question h3 {
+            color: #333;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .question-number {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            background: rgba(79, 172, 254, 0.05);
+            border: 2px solid rgba(79, 172, 254, 0.2);
+            border-radius: 10px;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .option:hover {
+            background: rgba(79, 172, 254, 0.1);
+            border-color: #4facfe;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            background: rgba(79, 172, 254, 0.2);
+            border-color: #4facfe;
+            color: #333;
+        }
+
+        .option.correct {
+            background: rgba(46, 204, 113, 0.2);
+            border-color: #2ecc71;
+            color: #27ae60;
+        }
+
+        .option.incorrect {
+            background: rgba(231, 76, 60, 0.2);
+            border-color: #e74c3c;
+            color: #c0392b;
+        }
+
+        .option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #4facfe;
+        }
+
+        .option label {
+            cursor: pointer;
+            flex: 1;
+            font-size: 1rem;
+        }
+
+        .controls {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn.home {
+            background: linear-gradient(135deg, #4ffec9 0%, #00fe4c 100%);
+            color: white;
+            border: black;
+            border-width: 1px;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-shadow: #333;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn.home:hover{
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 254, 146, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+        }
+
+        .btn.back {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn.back:hover {
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+        }
+
+        .results {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            display: none;
+        }
+
+        .score {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .score.excellent {
+            color: #27ae60;
+        }
+
+        .score.good {
+            color: #f39c12;
+        }
+
+        .score.needs-improvement {
+            color: #e74c3c;
+        }
+
+        .feedback {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .explanation {
+            background: rgba(79, 172, 254, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+            text-align: left;
+            display: none;
+        }
+
+        .explanation h4 {
+            color: #4facfe;
+            margin-bottom: 10px;
+        }
+
+        .explanation.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 8px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 25px 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .header p {
+                font-size: 1rem;
+            }
+
+            .quiz-content {
+                padding: 15px;
+            }
+
+            .question h3 { 
+                font-size: 1.1rem;
+                line-height: 1.3;
+            }
+            
+            .question {
+                padding: 18px;
+            }
+            
+            .controls {
+                padding: 12px;
+                gap: 8px;
+            }
+            
+            .btn {
+                padding: 8px 16px;
+                font-size: 0.85rem;
+                margin: 2px;
+                min-width: 100px;
+            }
+
+            .option label {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .header p {
+                font-size: 0.9rem;
+            }
+            
+            .quiz-content {
+                padding: 12px;
+            }
+            
+            .question {
+                padding: 15px;
+            }
+            
+            .question h3 {
+                font-size: 1rem;
+                line-height: 1.2;
+            }
+            
+            .btn {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+                min-width: 90px;
+            }
+            
+            .option {
+                padding: 12px 15px;
+            }
+            
+            .option label {
+                font-size: 0.85rem;
+                line-height: 1.3;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            
+            .quiz-content {
+                padding: 10px;
+            }
+            
+            .question {
+                padding: 12px;
+            }
+            
+            .question h3 {
+                font-size: 0.9rem;
+            }
+            
+            .btn {
+                font-size: 0.75rem;
+                padding: 5px 10px;
+                min-width: 80px;
+            }
+            
+            .option label {
+                font-size: 0.8rem;
+            }
+            
+            .option {
+                padding: 10px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Set Charging Profile Quiz</h1>
+            <p>Test your understanding of Remote Charging Control</p>
+        </div>
+
+        <div class="quiz-info">
+            <p>⚡ <strong>Randomized Quiz:</strong> 5 questions selected from a bank of 20 questions | Each attempt will have different questions</p>
+            <div style="margin-top: 15px;">
+                <a href="ocpp_charging_profiles.html" class="btn back">
+                    📖 Back to Charging Profiles Guide
+                </a>
+                <a href="index.html" class="btn home">🏠 Back to Manu</a>
+            </div>
+        </div>
+
+        <div class="quiz-content">
+            <div id="questionsContainer">
+                <!-- Questions will be dynamically inserted here -->
+            </div>
+
+            <div class="controls">
+                <button class="btn" onclick="submitQuiz()" id="submitBtn">📝 Submit Quiz</button>
+                <button class="btn secondary" onclick="generateNewQuiz()" id="newQuizBtn">🎲 New Random Quiz</button>
+                <button class="btn secondary" onclick="resetQuiz()" id="resetBtn">🔄 Reset Current Quiz</button>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="ocpp_charging_profiles.html" class="btn back">📖 Back to Guide</a>
+                <a href="index.html" class="btn home">🏠 Back to Manu</a>
+            </div>
+
+            <div class="results" id="results">
+                <div class="score" id="scoreDisplay"></div>
+                <div class="feedback" id="feedbackText"></div>
+                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 20px;">
+                    <button class="btn" onclick="showExplanations()">💡 View Explanations</button>
+                    <a href="ocpp_charging_profiles.html" class="btn back">📖 Review Study Guide</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Bank of 20 questions about Set Charging Profile Events
+        const questionBank = [
+            {
+                id: 1,
+                question: "What is the best analogy to understand Set Charging Profile events?",
+                options: [
+                    { text: "Like sending text messages to friends", correct: false },
+                    { text: "Like programming a home thermostat or setting timers on a coffee maker", correct: true },
+                    { text: "Like checking the weather forecast", correct: false },
+                    { text: "Like watching television channels", correct: false }
+                ],
+                explanation: "Set Charging Profile events are detailed instructions sent to chargers, similar to programming your thermostat with specific temperature schedules for different times of day."
+            },
+            {
+                id: 2,
+                question: "What are the two main types of charging profiles?",
+                options: [
+                    { text: "FastProfile and SlowProfile", correct: false },
+                    { text: "TxProfile and TxDefaultProfile", correct: true },
+                    { text: "PowerProfile and EnergyProfile", correct: false },
+                    { text: "DayProfile and NightProfile", correct: false }
+                ],
+                explanation: "TxProfile applies to specific charging sessions, while TxDefaultProfile sets default rules for all future sessions unless specifically overridden."
+            },
+            {
+                id: 3,
+                question: "When would the management system typically send a TxProfile?",
+                options: [
+                    { text: "Only during station maintenance", correct: false },
+                    { text: "When a car plugs in and needs specific charging rules for that session", correct: true },
+                    { text: "Only at the end of each month for billing", correct: false },
+                    { text: "Only when the charger malfunctions", correct: false }
+                ],
+                explanation: "TxProfile is sent when specific charging rules are needed for an individual session - like limiting power during peak hours or following a customer's preferred schedule."
+            },
+            {
+                id: 4,
+                question: "What does 'connectorId: 0' mean in a charging profile?",
+                options: [
+                    { text: "The profile is disabled", correct: false },
+                    { text: "The profile applies to all connectors/ports", correct: true },
+                    { text: "The profile is for testing only", correct: false },
+                    { text: "There is an error in the configuration", correct: false }
+                ],
+                explanation: "ConnectorId: 0 means the profile applies to ALL charging ports on the station, while specific numbers (1, 2, 3) apply to individual ports."
+            },
+            {
+                id: 5,
+                question: "What does 'stackLevel' determine in charging profiles?",
+                options: [
+                    { text: "How tall the charging station is", correct: false },
+                    { text: "The priority level - lower numbers have higher priority", correct: true },
+                    { text: "How many cars can charge simultaneously", correct: false },
+                    { text: "The maximum charging speed allowed", correct: false }
+                ],
+                explanation: "StackLevel works like priority levels: 1-3 are high priority (specific sessions), 4-6 are medium priority (site rules), 7-9 are low priority (defaults)."
+            },
+            {
+                id: 6,
+                question: "In the TxProfile JSON example, what do the 'startPeriod' values (0, 14400, 72000) represent?",
+                options: [
+                    { text: "Power limits in kilowatts", correct: false },
+                    { text: "Time periods in seconds from the schedule start", correct: true },
+                    { text: "Battery charge percentages", correct: false },
+                    { text: "Temperature limits in Celsius", correct: false }
+                ],
+                explanation: "StartPeriod values are in seconds from schedule start: 0=6AM, 14400=10AM (4 hours later), 72000=2AM next day (20 hours later)."
+            },
+            {
+                id: 7,
+                question: "What is the main difference between 'A' (Amperes) and 'kW' (Kilowatts) as chargingRateUnit?",
+                options: [
+                    { text: "A measures current flow, kW measures total power", correct: true },
+                    { text: "A is for AC charging, kW is for DC charging", correct: false },
+                    { text: "A is for slow charging, kW is for fast charging", correct: false },
+                    { text: "They measure the same thing with different names", correct: false }
+                ],
+                explanation: "Amperes (A) measure electrical current flow (like gallons per minute), while Kilowatts (kW) measure total electrical power (combining current and voltage)."
+            },
+            {
+                id: 8,
+                question: "Why would a site owner send a TxDefaultProfile?",
+                options: [
+                    { text: "To bill customers more accurately", correct: false },
+                    { text: "To set standard charging rules for all future sessions unless overridden", correct: true },
+                    { text: "To test the charging station's connectivity", correct: false },
+                    { text: "To shut down the charging station", correct: false }
+                ],
+                explanation: "TxDefaultProfile establishes consistent baseline charging behavior for all users, like setting building-wide power limits or time-of-use schedules."
+            },
+            {
+                id: 9,
+                question: "What does 'recurrencyKind: Weekly' mean in a charging profile?",
+                options: [
+                    { text: "The profile only works for 7 days then expires", correct: false },
+                    { text: "The charging schedule pattern repeats every week", correct: true },
+                    { text: "Customers can only charge once per week", correct: false },
+                    { text: "The profile is updated every Sunday", correct: false }
+                ],
+                explanation: "Weekly recurrency means the schedule pattern (like different power limits for different days/times) repeats every 7 days automatically."
+            },
+            {
+                id: 10,
+                question: "In charging profiles, what does 'numberPhases: 3' indicate?",
+                options: [
+                    { text: "The charging will happen in 3 separate stages", correct: false },
+                    { text: "Three-phase electrical power for faster charging", correct: true },
+                    { text: "The profile has 3 different power levels", correct: false },
+                    { text: "3 cars can charge at the same time", correct: false }
+                ],
+                explanation: "NumberPhases refers to the electrical supply: 1-phase is typical home power, 3-phase is industrial power that enables faster charging speeds."
+            },
+            {
+                id: 11,
+                question: "What happens when a TxProfile (stackLevel 1) conflicts with a TxDefaultProfile (stackLevel 5)?",
+                options: [
+                    { text: "The system generates an error message", correct: false },
+                    { text: "TxProfile wins because it has lower stackLevel (higher priority)", correct: true },
+                    { text: "TxDefaultProfile wins because it's the default", correct: false },
+                    { text: "They are combined together into one rule", correct: false }
+                ],
+                explanation: "Lower stackLevel numbers have higher priority, so TxProfile (level 1) always overrides TxDefaultProfile (level 5) when they conflict."
+            },
+            {
+                id: 12,
+                question: "Why might an operator set different power limits during different time periods?",
+                options: [
+                    { text: "To test different charging speeds randomly", correct: false },
+                    { text: "To manage electricity costs, grid demand, and building electrical limits", correct: true },
+                    { text: "To make the charging process more complicated", correct: false },
+                    { text: "To prevent customers from charging too quickly", correct: false }
+                ],
+                explanation: "Time-based power limits help reduce costs during expensive peak hours, prevent building electrical overloads, and manage grid demand efficiently."
+            },
+            {
+                id: 13,
+                question: "What does 'duration: 86400' mean in a charging schedule?",
+                options: [
+                    { text: "The schedule lasts for 86,400 minutes", correct: false },
+                    { text: "The schedule lasts for 86,400 seconds (24 hours)", correct: true },
+                    { text: "The maximum power allowed is 86.4 kW", correct: false },
+                    { text: "The profile ID number is 86400", correct: false }
+                ],
+                explanation: "Duration is always in seconds: 86,400 seconds = 24 hours (60×60×24). Similarly, 604,800 seconds = 1 week."
+            },
+            {
+                id: 14,
+                question: "In the JSON example, why does TxProfile include a 'transactionId' but TxDefaultProfile doesn't?",
+                options: [
+                    { text: "It's a mistake in the documentation", correct: false },
+                    { text: "TxProfile applies to a specific session, TxDefaultProfile applies to all sessions", correct: true },
+                    { text: "TxDefaultProfile uses a different field name", correct: false },
+                    { text: "TransactionId is only needed for billing purposes", correct: false }
+                ],
+                explanation: "TransactionId links TxProfile to one specific charging session, while TxDefaultProfile applies to all future sessions so it needs no specific transaction link."
+            },
+            {
+                id: 15,
+                question: "What is the everyday analogy difference between TxProfile and TxDefaultProfile?",
+                options: [
+                    { text: "TxProfile is like a one-time alarm, TxDefaultProfile is like your default alarm schedule", correct: true },
+                    { text: "TxProfile is for weekdays, TxDefaultProfile is for weekends", correct: false },
+                    { text: "TxProfile is faster, TxDefaultProfile is slower", correct: false },
+                    { text: "TxProfile costs more, TxDefaultProfile is free", correct: false }
+                ],
+                explanation: "Perfect analogy: TxProfile is like setting a special one-time alarm for tomorrow, while TxDefaultProfile is like your regular Monday-Friday alarm that repeats automatically."
+            },
+            {
+                id: 16,
+                question: "When would you typically see 'chargingProfileKind: Absolute' vs 'chargingProfileKind: Recurring'?",
+                options: [
+                    { text: "Absolute for one-time events, Recurring for repeating patterns", correct: true },
+                    { text: "Absolute for fast charging, Recurring for slow charging", correct: false },
+                    { text: "Absolute for AC power, Recurring for DC power", correct: false },
+                    { text: "They mean exactly the same thing", correct: false }
+                ],
+                explanation: "Absolute profiles are for specific one-time schedules (like 'charge tonight from 10 PM to 6 AM'), while Recurring profiles repeat automatically (like 'every night from 10 PM to 6 AM')."
+            },
+            {
+                id: 17,
+                question: "What does 'validFrom' and 'validTo' control in charging profiles?",
+                options: [
+                    { text: "The charging speed range allowed", correct: false },
+                    { text: "When the charging profile rules are active and enforceable", correct: true },
+                    { text: "Which connectors the profile applies to", correct: false },
+                    { text: "The customer billing period", correct: false }
+                ],
+                explanation: "ValidFrom and validTo set the time window when the profile rules are active. Outside this window, the profile is ignored and other rules apply."
+            },
+            {
+                id: 18,
+                question: "Why might a building operator use charging profiles during peak electricity hours?",
+                options: [
+                    { text: "To charge customers higher rates", correct: false },
+                    { text: "To reduce power consumption when electricity is expensive and grid demand is high", correct: true },
+                    { text: "To prevent cars from charging completely", correct: false },
+                    { text: "To test the charging equipment", correct: false }
+                ],
+                explanation: "During peak hours, electricity costs more and the grid is stressed. Reducing charging power saves money and helps prevent electrical system overloads."
+            },
+            {
+                id: 19,
+                question: "What happens if a charging profile has overlapping time periods with different power limits?",
+                options: [
+                    { text: "The charger stops working", correct: false },
+                    { text: "The later time period overrides the earlier one", correct: true },
+                    { text: "The higher power limit always wins", correct: false },
+                    { text: "The system averages the two limits", correct: false }
+                ],
+                explanation: "Charging schedule periods are processed in order. When a new time period starts, it overrides the previous period's settings until the next period begins."
+            },
+            {
+                id: 20,
+                question: "In real-world operations, what is the primary benefit of using Set Charging Profile events?",
+                options: [
+                    { text: "Making the charging process more complicated", correct: false },
+                    { text: "Remote control over when and how fast vehicles charge, optimizing costs and grid impact", correct: true },
+                    { text: "Preventing electric vehicles from charging", correct: false },
+                    { text: "Collecting more data for research purposes", correct: false }
+                ],
+                explanation: "The key benefit is intelligent charging management: operators can remotely optimize charging schedules to reduce costs, prevent grid overloads, and accommodate customer preferences without physical intervention."
+            }
+        ];
+
+        let currentQuestions = [];
+        let selectedAnswers = {};
+        let submitted = false;
+
+        function generateRandomQuestions() {
+            // Shuffle the question bank and take first 5
+            const shuffled = [...questionBank].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, 5);
+        }
+
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+
+            currentQuestions.forEach((question, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question';
+                questionDiv.id = `q${question.id}`;
+
+                const optionsHtml = question.options.map((option, optIndex) => `
+                    <div class="option" onclick="selectOption(this, 'q${question.id}', ${option.correct})">
+                        <input type="radio" name="q${question.id}" value="${optIndex}" id="q${question.id}${String.fromCharCode(97 + optIndex)}">
+                        <label for="q${question.id}${String.fromCharCode(97 + optIndex)}">${option.text}</label>
+                    </div>
+                `).join('');
+
+                questionDiv.innerHTML = `
+                    <h3>
+                        <span class="question-number">${index + 1}</span>
+                        ${question.question}
+                    </h3>
+                    <div class="options">
+                        ${optionsHtml}
+                    </div>
+                    <div class="explanation">
+                        <h4>✅ Correct Answer: ${question.options.find(opt => opt.correct).text}</h4>
+                        <p>${question.explanation}</p>
+                    </div>
+                `;
+
+                container.appendChild(questionDiv);
+            });
+        }
+
+        function selectOption(element, questionId, isCorrect) {
+            if (submitted) return;
+
+            // Remove selection from other options in this question
+            const question = document.getElementById(questionId);
+            const options = question.querySelectorAll('.option');
+            options.forEach(opt => opt.classList.remove('selected'));
+
+            // Add selection to clicked option
+            element.classList.add('selected');
+            element.querySelector('input').checked = true;
+
+            // Store the answer
+            selectedAnswers[questionId] = isCorrect;
+        }
+
+        function submitQuiz() {
+            if (Object.keys(selectedAnswers).length < 5) {
+                alert('Please answer all questions before submitting!');
+                return;
+            }
+
+            submitted = true;
+            
+            // Calculate score
+            const correctAnswers = Object.values(selectedAnswers).filter(answer => answer === true).length;
+            const totalQuestions = 5;
+            const percentage = Math.round((correctAnswers / totalQuestions) * 100);
+
+            // Show correct/incorrect styling
+            currentQuestions.forEach(question => {
+                const questionDiv = document.getElementById(`q${question.id}`);
+                const options = questionDiv.querySelectorAll('.option');
+                
+                options.forEach((option, optIndex) => {
+                    const isSelected = option.classList.contains('selected');
+                    const isCorrect = question.options[optIndex].correct;
+                    
+                    if (isSelected) {
+                        if (selectedAnswers[`q${question.id}`]) {
+                            option.classList.add('correct');
+                        } else {
+                            option.classList.add('incorrect');
+                        }
+                    }
+                    
+                    // Highlight correct answer if wrong answer was selected
+                    if (isCorrect && !isSelected && selectedAnswers[`q${question.id}`] === false) {
+                        option.classList.add('correct');
+                    }
+                });
+            });
+
+            // Display results
+            const resultsDiv = document.getElementById('results');
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const feedbackText = document.getElementById('feedbackText');
+
+            scoreDisplay.textContent = `${correctAnswers}/${totalQuestions} (${percentage}%)`;
+            
+            if (percentage >= 80) {
+                scoreDisplay.className = 'score excellent';
+                feedbackText.textContent = '🎉 Excellent! You understand Set Charging Profiles perfectly!';
+            } else if (percentage >= 60) {
+                scoreDisplay.className = 'score good';
+                feedbackText.textContent = '👍 Good job! You grasp the basics. Review the explanations to master the advanced concepts.';
+            } else {
+                scoreDisplay.className = 'score needs-improvement';
+                feedbackText.textContent = '📚 Keep studying! Review the charging profiles guide and try again to improve your understanding.';
+            }
+
+            resultsDiv.style.display = 'block';
+            document.getElementById('submitBtn').disabled = true;
+        }
+
+        function showExplanations() {
+            const explanations = document.querySelectorAll('.explanation');
+            explanations.forEach(exp => exp.classList.add('show'));
+        }
+
+        function resetQuiz() {
+            submitted = false;
+            selectedAnswers = {};
+            
+            // Reset all styling
+            const options = document.querySelectorAll('.option');
+            options.forEach(opt => {
+                opt.classList.remove('selected', 'correct', 'incorrect');
+                opt.querySelector('input').checked = false;
+            });
+
+            // Hide results and explanations
+            document.getElementById('results').style.display = 'none';
+            const explanations = document.querySelectorAll('.explanation');
+            explanations.forEach(exp => exp.classList.remove('show'));
+
+            // Re-enable submit button
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        function generateNewQuiz() {
+            // Reset everything
+            resetQuiz();
+            
+            // Generate new random questions
+            currentQuestions = generateRandomQuestions();
+            
+            // Render new questions
+            renderQuestions();
+        }
+
+        // Initialize quiz on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            currentQuestions = generateRandomQuestions();
+            renderQuestions();
+        });
+    </script>
+</body>
+</html>
