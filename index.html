@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCPP 1.6 Protocol Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 50px 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="1" fill="rgba(255,255,255,0.1)"/></svg>');
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .intro-section {
+            padding: 40px;
+            background: rgba(79, 172, 254, 0.05);
+            border-bottom: 1px solid rgba(79, 172, 254, 0.1);
+        }
+
+        .intro-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .intro-content h2 {
+            color: #4facfe;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .intro-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .intro-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #4facfe;
+            transition: transform 0.3s ease;
+        }
+
+        .intro-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .intro-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .intro-card h3 {
+            color: #333;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+
+        .intro-card p {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .section-title h2 {
+            color: #333;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        .section-title p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .module-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(79, 172, 254, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .module-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .module-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .module-header .icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .module-header h3 {
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+        }
+
+        .module-header p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .module-content {
+            padding: 25px;
+        }
+
+        .module-content p {
+            color: #555;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .module-features {
+            margin-bottom: 25px;
+        }
+
+        .module-features ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .module-features li {
+            color: #333;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .module-features li::before {
+            content: "✅";
+            font-size: 0.9rem;
+        }
+
+        .module-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+            box-shadow: 0 4px 15px rgba(149, 165, 166, 0.3);
+        }
+
+        .btn.secondary:hover {
+            box-shadow: 0 6px 20px rgba(149, 165, 166, 0.4);
+        }
+
+        .coming-soon {
+            opacity: 0.7;
+            position: relative;
+        }
+
+        .coming-soon::after {
+            content: "Coming Soon";
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .coming-soon .btn {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .footer-section {
+            background: rgba(79, 172, 254, 0.1);
+            padding: 30px 40px;
+            text-align: center;
+            border-top: 1px solid rgba(79, 172, 254, 0.2);
+        }
+
+        .footer-section h3 {
+            color: #4facfe;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .footer-section p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .progress-indicator {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 8px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            height: 100%;
+            border-radius: 10px;
+            width: 40%;
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 8px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .header p {
+                font-size: 1.1rem;
+            }
+            
+            .intro-section {
+                padding: 25px 20px;
+            }
+            
+            .intro-content h2 {
+                font-size: 1.6rem;
+            }
+            
+            .intro-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .main-content {
+                padding: 25px 20px;
+            }
+            
+            .modules-grid {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+            
+            .section-title h2 {
+                font-size: 1.8rem;
+            }
+            
+            .module-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                min-width: auto;
+            }
+            
+            .footer-section {
+                padding: 25px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+            
+            .intro-section {
+                padding: 20px 15px;
+            }
+            
+            .main-content {
+                padding: 20px 15px;
+            }
+            
+            .intro-content h2 {
+                font-size: 1.4rem;
+            }
+            
+            .section-title h2 {
+                font-size: 1.5rem;
+            }
+            
+            .module-header {
+                padding: 20px;
+            }
+            
+            .module-content {
+                padding: 20px;
+            }
+            
+            .footer-section {
+                padding: 20px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚡ OCPP 1.6 Protocol Guide</h1>
+            <p>Complete learning resource for understanding electric vehicle charging communication</p>
+        </div>
+
+        <div class="intro-section">
+            <div class="intro-content">
+                <h2>🤔 What is OCPP 1.6 and Why Do We Need It?</h2>
+                <p style="text-align: center; font-size: 1.1rem; color: #555; margin-bottom: 25px;">
+                    Think of OCPP 1.6 as the <strong>"universal language"</strong> that allows electric vehicle charging stations to talk to management systems. Just like how your phone needs to communicate with cell towers, EV chargers need to communicate with backend systems.
+                </p>
+                
+                <div class="intro-grid">
+                    <div class="intro-card">
+                        <span class="icon">🗣️</span>
+                        <h3>Communication Bridge</h3>
+                        <p>OCPP enables charging stations from different manufacturers to work with any management system. It's like having a universal translator that ensures everyone speaks the same language.</p>
+                    </div>
+                    <div class="intro-card">
+                        <span class="icon">📊</span>
+                        <h3>Real-Time Monitoring</h3>
+                        <p>Track everything happening at charging stations: energy consumption, charging status, equipment health, and customer sessions - all in real-time from a central location.</p>
+                    </div>
+                    <div class="intro-card">
+                        <span class="icon">🎛️</span>
+                        <h3>Remote Control</h3>
+                        <p>Start/stop charging sessions, set power limits, schedule maintenance, and configure settings without physically visiting each charging station.</p>
+                    </div>
+                    <div class="intro-card">
+                        <span class="icon">💰</span>
+                        <h3>Business Operations</h3>
+                        <p>Handle customer billing, manage energy costs, optimize charging schedules, and ensure compliance with regulations - all through standardized communication.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="section-title">
+                <h2>📚 Learning Modules</h2>
+                <p>Master OCPP 1.6 through interactive guides and quizzes</p>
+            </div>
+
+            <div class="modules-grid">
+                <div class="module-card">
+                    <div class="module-header">
+                        <span class="icon">📊</span>
+                        <h3>Meter Values</h3>
+                        <p>Understanding Energy & Power Measurements</p>
+                    </div>
+                    <div class="module-content">
+                        <p>Learn how charging stations report real-time data like energy consumption, power delivery, battery charge levels, and equipment status to management systems.</p>
+                        <div class="module-features">
+                            <ul>
+                                <li>Energy vs Power concepts explained simply</li>
+                                <li>JSON message examples with real data</li>
+                                <li>Billing and safety monitoring insights</li>
+                                <li>Interactive examples and analogies</li>
+                            </ul>
+                        </div>
+                        <div class="module-actions">
+                            <a href="ocpp16_meter_value.html" class="btn">📖 Study Guide</a>
+                            <a href="meter_values_quiz.html" class="btn secondary">🧠 Take Quiz</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="module-card">
+                    <div class="module-header">
+                        <span class="icon">🔧</span>
+                        <h3>Set Charging Profiles</h3>
+                        <p>Remote Charging Control & Scheduling</p>
+                    </div>
+                    <div class="module-content">
+                        <p>Master how management systems remotely control charging schedules, power limits, and timing to optimize costs, manage grid load, and meet customer preferences.</p>
+                        <div class="module-features">
+                            <ul>
+                                <li>TxProfile vs TxDefaultProfile explained</li>
+                                <li>Time-based power scheduling</li>
+                                <li>Priority systems and overrides</li>
+                                <li>Cost optimization strategies</li>
+                            </ul>
+                        </div>
+                        <div class="module-actions">
+                            <a href="ocpp16_charging_profiles.html" class="btn">📖 Study Guide</a>
+                            <a href="charging_profiles_quiz.html" class="btn secondary">🧠 Take Quiz</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="module-card coming-soon">
+                    <div class="module-header">
+                        <span class="icon">🚀</span>
+                        <h3>Start Transaction</h3>
+                        <p>Beginning Charging Sessions</p>
+                    </div>
+                    <div class="module-content">
+                        <p>Understand how charging sessions begin, including user authorization, connector allocation, and initial session setup communications between charger and management system.</p>
+                        <div class="module-features">
+                            <ul>
+                                <li>Session initiation process</li>
+                                <li>Authorization methods</li>
+                                <li>Connector status management</li>
+                                <li>Error handling scenarios</li>
+                            </ul>
+                        </div>
+                        <div class="module-actions">
+                            <a href="#" class="btn">📖 Study Guide</a>
+                            <a href="#" class="btn secondary">🧠 Take Quiz</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="module-card coming-soon">
+                    <div class="module-header">
+                        <span class="icon">🛑</span>
+                        <h3>Stop Transaction</h3>
+                        <p>Ending Charging Sessions</p>
+                    </div>
+                    <div class="module-content">
+                        <p>Learn how charging sessions conclude, including final meter readings, transaction summaries, billing calculations, and proper session termination procedures.</p>
+                        <div class="module-features">
+                            <ul>
+                                <li>Session termination process</li>
+                                <li>Final energy calculations</li>
+                                <li>Billing data collection</li>
+                                <li>Connector cleanup procedures</li>
+                            </ul>
+                        </div>
+                        <div class="module-actions">
+                            <a href="#" class="btn">📖 Study Guide</a>
+                            <a href="#" class="btn secondary">🧠 Take Quiz</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="module-card coming-soon">
+                    <div class="module-header">
+                        <span class="icon">📡</span>
+                        <h3>Status Notifications</h3>
+                        <p>Equipment Health & State Updates</p>
+                    </div>
+                    <div class="module-content">
+                        <p>Explore how charging stations communicate their operational status, equipment health, error conditions, and state changes to management systems for monitoring and maintenance.</p>
+                        <div class="module-features">
+                            <ul>
+                                <li>Status codes and meanings</li>
+                                <li>Error reporting mechanisms</li>
+                                <li>Maintenance notifications</li>
+                                <li>Real-time status monitoring</li>
+                            </ul>
+                        </div>
+                        <div class="module-actions">
+                            <a href="#" class="btn">📖 Study Guide</a>
+                            <a href="#" class="btn secondary">🧠 Take Quiz</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="module-card coming-soon">
+                    <div class="module-header">
+                        <span class="icon">🔮</span>
+                        <h3>More Topics</h3>
+                        <p>Additional OCPP 1.6 Features</p>
+                    </div>
+                    <div class="module-content">
+                        <p>Future modules will cover advanced OCPP topics like firmware updates, diagnostics, configuration management, and integration with smart grid systems.</p>
+                        <div class="module-features">
+                            <ul>
+                                <li>Firmware update procedures</li>
+                                <li>Remote diagnostics</li>
+                                <li>Configuration management</li>
+                                <li>Smart grid integration</li>
+                            </ul>
+                        </div>
+                        <div class="module-actions">
+                            <a href="#" class="btn">📖 Coming Soon</a>
+                            <a href="#" class="btn secondary">🔮 Future</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-section">
+            <h3>🎯 Learning Progress</h3>
+            <p>Track your journey through the OCPP 1.6 protocol</p>
+            <div class="progress-indicator">
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <p style="margin: 0; color: #4facfe; font-weight: 600;">2 of 5 modules completed (40%)</p>
+                <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9rem;">Complete all available modules to master the fundamentals!</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+            
