@@ -822,6 +822,22 @@
             currentQuestions = generateRandomQuestions();
             renderQuestions();
         });
+                // updateLclStrg
+function updateProgress(moduleName) {
+    const progress = JSON.parse(localStorage.getItem('ocpp_progress') || '{}') || {
+        meterValues: false,
+        chargingProfiles: false,
+        startTransaction: false,
+        stopTransaction: false,
+        statusNotifications: false
+    };
+    
+    progress[moduleName] = true;
+    
+    localStorage.setItem('ocpp_progress', JSON.stringify(progress));
+    
+    console.log('Progress updated:', progress); 
+}
     </script>
 </body>
 </html>
