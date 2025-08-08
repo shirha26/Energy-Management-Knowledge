@@ -405,7 +405,7 @@
             </div>
 
             <div class="controls">
-                <button class="btn" onclick="submitQuiz()" id="submitBtn">📝 Submit Quiz</button>
+                <button class="btn" onclick="" id="submitBtn">📝 Submit Quiz</button>
                 <button class="btn secondary" onclick="generateNewQuiz()" id="newQuizBtn">🎲 New Random Quiz</button>
                 <button class="btn secondary" onclick="resetQuiz()" id="resetBtn">🔄 Reset Current Quiz</button>
             </div>
@@ -710,6 +710,18 @@
                 
                 scoreDisplay.className = 'score excellent';
                 feedbackText.textContent = '🎉 Excellent! You have a solid understanding of OCPP meter values!';
+                // Mark meter values module as completed
+                try {
+                    if (window.parent && typeof window.parent.markModuleCompleted === 'function') {
+                        window.parent.markModuleCompleted('meterValues');
+                    } else if (typeof markModuleCompleted === 'function') {
+                        markModuleCompleted('meterValues');
+                    } else if (window.markModuleCompleted) {
+                        window.markModuleCompleted('meterValues');
+                    }
+                } catch (error) {
+                    console.log('Could not mark module completed:', error);
+                }
             } else if (percentage >= 60) {
                 scoreDisplay.className = 'score good';
                 feedbackText.textContent = '👍 Good job! You understand the basics. Review the explanations to master the details.';
