@@ -769,6 +769,20 @@
                 updateProgress('chargingProfiles');
                 scoreDisplay.className = 'score excellent';
                 feedbackText.textContent = '🎉 Excellent! You understand Set Charging Profiles perfectly!';
+
+                // MarkModuleCompleted
+                try {
+                    if (window.parent && typeof window.parent.markModuleCompleted === 'function') {
+                        window.parent.markModuleCompleted('chargingProfiles');
+                    } else if (typeof markModuleCompleted === 'function') {
+                        markModuleCompleted('chargingProfiles');
+                    } else if (window.markModuleCompleted) {
+                        window.markModuleCompleted('chargingProfiles');
+                    }
+                } catch (error) {
+                    console.log('Could not mark module completed:', error);
+                }
+                
             } else if (percentage >= 60) {
                 scoreDisplay.className = 'score good';
                 feedbackText.textContent = '👍 Good job! You grasp the basics. Review the explanations to master the advanced concepts.';
