@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCPP 1.6 Start Transaction Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .quiz-info {
+            background: rgba(79, 172, 254, 0.1);
+            padding: 20px 40px;
+            text-align: center;
+            border-bottom: 1px solid rgba(79, 172, 254, 0.2);
+        }
+
+        .quiz-info p {
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .quiz-content {
+            padding: 40px;
+        }
+
+        .question {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #4facfe;
+        }
+
+        .question h3 {
+            color: #333;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .question-number {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            background: rgba(79, 172, 254, 0.05);
+            border: 2px solid rgba(79, 172, 254, 0.2);
+            border-radius: 10px;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .option:hover {
+            background: rgba(79, 172, 254, 0.1);
+            border-color: #4facfe;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            background: rgba(79, 172, 254, 0.2);
+            border-color: #4facfe;
+            color: #333;
+        }
+
+        .option.correct {
+            background: rgba(46, 204, 113, 0.2);
+            border-color: #2ecc71;
+            color: #27ae60;
+        }
+
+        .option.incorrect {
+            background: rgba(231, 76, 60, 0.2);
+            border-color: #e74c3c;
+            color: #c0392b;
+        }
+
+        .option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #4facfe;
+        }
+
+        .option label {
+            cursor: pointer;
+            flex: 1;
+            font-size: 1rem;
+        }
+
+        .controls {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn.home {
+            background: linear-gradient(135deg, #4ffec9 0%, #00fe4c 100%);
+            color: white;
+        }
+
+        .btn.home:hover{
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 254, 146, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+        }
+
+        .btn.back {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn.back:hover {
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+        }
+
+        .results {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            display: none;
+        }
+
+        .score {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .score.excellent {
+            color: #27ae60;
+        }
+
+        .score.good {
+            color: #f39c12;
+        }
+
+        .score.needs-improvement {
+            color: #e74c3c;
+        }
+
+        .feedback {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .explanation {
+            background: rgba(79, 172, 254, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+            text-align: left;
+            display: none;
+        }
+
+        .explanation h4 {
+            color: #4facfe;
+            margin-bottom: 10px;
+        }
+
+        .explanation.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 8px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 25px 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .header p {
+                font-size: 1rem;
+            }
+
+            .quiz-content {
+                padding: 15px;
+            }
+
+            .question h3 { 
+                font-size: 1.1rem;
+                line-height: 1.3;
+            }
+            
+            .question {
+                padding: 18px;
+            }
+            
+            .controls {
+                padding: 12px;
+                gap: 8px;
+            }
+            
+            .btn {
+                padding: 8px 16px;
+                font-size: 0.85rem;
+                margin: 2px;
+                min-width: 100px;
+            }
+
+            .option label {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .header p {
+                font-size: 0.9rem;
+            }
+            
+            .quiz-content {
+                padding: 12px;
+            }
+            
+            .question {
+                padding: 15px;
+            }
+            
+            .question h3 {
+                font-size: 1rem;
+                line-height: 1.2;
+            }
+            
+            .btn {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+                min-width: 90px;
+            }
+            
+            .option {
+                padding: 12px 15px;
+            }
+            
+            .option label {
+                font-size: 0.85rem;
+                line-height: 1.3;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            
+            .quiz-content {
+                padding: 10px;
+            }
+            
+            .question {
+                padding: 12px;
+            }
+            
+            .question h3 {
+                font-size: 0.9rem;
+            }
+            
+            .btn {
+                font-size: 0.75rem;
+                padding: 5px 10px;
+                min-width: 80px;
+            }
+            
+            .option label {
+                font-size: 0.8rem;
+            }
+            
+            .option {
+                padding: 10px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Start Transaction Quiz</h1>
+            <p>Test your understanding of Charging Session Initiation</p>
+        </div>
+
+        <div class="quiz-info">
+            <p>⚡ <strong>Randomized Quiz:</strong> 5 questions selected from a bank of 25 questions | Each attempt will have different questions</p>
+            <div style="margin-top: 15px;">
+                <a href="ocpp16_start_transaction.html" class="btn back">
+                    📖 Back to Start Transaction Guide
+                </a>
+                <a href="index.html" class="btn home">🏠 Back to Menu</a>
+            </div>
+        </div>
+
+        <div class="quiz-content">
+            <div id="questionsContainer">
+                <!-- Questions will be dynamically inserted here -->
+            </div>
+
+            <div class="controls">
+                <button class="btn" onclick="submitQuiz()" id="submitBtn">📝 Submit Quiz</button>
+                <button class="btn secondary" onclick="generateNewQuiz()" id="newQuizBtn">🎲 New Random Quiz</button>
+                <button class="btn secondary" onclick="resetQuiz()" id="resetBtn">🔄 Reset Current Quiz</button>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="ocpp16_start_transaction.html" class="btn back">📖 Back to Guide</a>
+                <a href="index.html" class="btn home">🏠 Back to Menu</a>
+            </div>
+
+            <div class="results" id="results">
+                <div class="score" id="scoreDisplay"></div>
+                <div class="feedback" id="feedbackText"></div>
+                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 20px;">
+                    <button class="btn" onclick="showExplanations()">💡 View Explanations</button>
+                    <a href="ocpp16_start_transaction.html" class="btn back">📖 Review Study Guide</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Bank of 25 questions about Start Transaction Events
+        const questionBank = [
+            {
+                id: 1,
+                question: "What is the best analogy to understand Start Transaction events?",
+                options: [
+                    { text: "Like turning the key in your car's ignition to officially start the engine", correct: true },
+                    { text: "Like checking the weather before leaving home", correct: false },
+                    { text: "Like buying groceries at a supermarket", correct: false },
+                    { text: "Like watching a movie at the cinema", correct: false }
+                ],
+                explanation: "Start Transaction is like turning the ignition key - it's the official moment that begins the charging session, just like turning a key officially starts your car's engine."
+            },
+            {
+                id: 2,
+                question: "What must happen BEFORE a Start Transaction message can be sent?",
+                options: [
+                    { text: "The car battery must be completely empty", correct: false },
+                    { text: "User must be successfully authorized (RFID card, app, etc.)", correct: true },
+                    { text: "The weather must be suitable for charging", correct: false },
+                    { text: "A maintenance technician must inspect the charger", correct: false }
+                ],
+                explanation: "Authorization is essential before starting any charging session. Like needing to show your membership card at a gym before using the equipment."
+            },
+            {
+                id: 3,
+                question: "In the Start Transaction JSON example, what does 'meterStart: 0' indicate?",
+                options: [
+                    { text: "The charging station is broken", correct: false },
+                    { text: "No electricity will be delivered", correct: false },
+                    { text: "This is the initial meter reading when charging begins", correct: true },
+                    { text: "The session will cost nothing", correct: false }
+                ],
+                explanation: "MeterStart: 0 means this is the baseline energy reading when the session begins - like resetting a trip odometer to zero when you start a journey."
+            },
+            {
+                id: 4,
+                question: "What happens if user authorization fails during the start process?",
+                options: [
+                    { text: "Charging continues anyway for safety reasons", correct: false },
+                    { text: "User sees 'Authorization Failed' and cannot start charging", correct: true },
+                    { text: "The charging station automatically shuts down", correct: false },
+                    { text: "The car receives free electricity", correct: false }
+                ],
+                explanation: "Failed authorization prevents charging from starting - like being denied entry to a concert because your ticket isn't valid. No valid authorization = no charging."
+            },
+            {
+                id: 5,
+                question: "Which of these is NOT a common authorization method for starting transactions?",
+                options: [
+                    { text: "RFID card tap", correct: false },
+                    { text: "Mobile app activation", correct: false },
+                    { text: "Voice command recognition", correct: true },
+                    { text: "Credit card payment", correct: false }
+                ],
+                explanation: "Voice commands aren't used for EV charging authorization due to security and reliability concerns. Physical cards, apps, and payment cards are much more secure and reliable."
+            },
+            {
+                id: 6,
+                question: "What does 'connectorId: 1' mean in a Start Transaction message?",
+                options: [
+                    { text: "This is the first charging session ever at this station", correct: false },
+                    { text: "The session is starting on charging port number 1", correct: true },
+                    { text: "Only one car can charge at a time", correct: false },
+                    { text: "The charging speed is set to level 1", correct: false }
+                ],
+                explanation: "ConnectorId identifies which specific charging port is being used - like apartment numbers in a building. Each charging port has its own unique ID number."
+            },
+            {
+                id: 7,
+                question: "What is the purpose of the unique 'transactionId' returned in the Start Transaction response?",
+                options: [
+                    { text: "It determines how much the customer will be charged", correct: false },
+                    { text: "It sets the maximum charging speed allowed", correct: false },
+                    { text: "It tracks this specific charging session from start to finish", correct: true },
+                    { text: "It controls which connector the customer can use", correct: false }
+                ],
+                explanation: "The transactionId is like a tracking number for a package - it uniquely identifies this charging session so it can be monitored, billed, and managed throughout its entire lifecycle."
+            },
+            {
+                id: 8,
+                question: "During the 'Physical Connection' step, what safety checks are performed?",
+                options: [
+                    { text: "Only checking that the cable isn't damaged", correct: false },
+                    { text: "Proper connection, vehicle readiness, safety systems, and communication verification", correct: true },
+                    { text: "Just confirming the car brand and model", correct: false },
+                    { text: "Only testing the electrical outlet voltage", correct: false }
+                ],
+                explanation: "Multiple safety checks ensure safe charging: secure cable connection, vehicle confirmation, active safety systems, and proper communication between car and charger."
+            },
+            {
+                id: 9,
+                question: "If a charging cable is unplugged immediately after authorization but before Start Transaction, what happens?",
+                options: [
+                    { text: "Start Transaction is sent anyway", correct: false },
+                    { text: "The session cannot begin because physical connection is required", correct: true },
+                    { text: "The user is automatically charged for a full session", correct: false },
+                    { text: "The charging station becomes permanently unavailable", correct: false }
+                ],
+                explanation: "Physical connection is essential - like trying to fuel a car without putting the nozzle in the tank. No connection means no charging session can begin."
+            },
+            {
+                id: 10,
+                question: "What real-world analogy best describes the 'System Verification' step?",
+                options: [
+                    { text: "Like checking your phone for text messages", correct: false },
+                    { text: "Like a pilot's pre-flight safety checklist", correct: true },
+                    { text: "Like choosing what to watch on Netflix", correct: false },
+                    { text: "Like buying coffee at a café", correct: false }
+                ],
+                explanation: "System verification is like a pilot's pre-flight check - ensuring all systems are working properly and it's safe to proceed before beginning the main operation."
+            },
+            {
+                id: 11,
+                question: "In Start Transaction, what does 'idTag' represent?",
+                options: [
+                    { text: "The charging station's identification number", correct: false },
+                    { text: "The user's identification credential (RFID, app user ID, etc.)", correct: true },
+                    { text: "A random number generated by the system", correct: false },
+                    { text: "The car's license plate number", correct: false }
+                ],
+                explanation: "IdTag identifies the user who is starting the charging session - like your membership number at a gym or your account name when logging into a service."
+            },
+            {
+                id: 12,
+                question: "What happens during the brief 'Preparing' phase before charging begins?",
+                options: [
+                    { text: "The user needs to enter their credit card PIN", correct: false },
+                    { text: "System performs final checks and sets up the charging session", correct: true },
+                    { text: "The car automatically drives itself to the optimal position", correct: false },
+                    { text: "Weather conditions are analyzed", correct: false }
+                ],
+                explanation: "The Preparing phase is like the moment after restaurant payment is approved - final preparations are made (setting up the service) before the main activity begins."
+            },
+            {
+                id: 13,
+                question: "Which timestamp format is used in OCPP Start Transaction messages?",
+                options: [
+                    { text: "MM/DD/YYYY format like American dates", correct: false },
+                    { text: "Unix timestamp (seconds since 1970)", correct: false },
+                    { text: "ISO 8601 format like '2025-08-07T14:30:00.000Z'", correct: true },
+                    { text: "Simple time like '2:30 PM'", correct: false }
+                ],
+                explanation: "OCPP uses ISO 8601 international standard timestamp format, which includes date, time, and timezone information in a precise, unambiguous format."
+            },
+            {
+                id: 14,
+                question: "What could cause a Start Transaction to fail even with valid authorization?",
+                options: [
+                    { text: "The car is painted the wrong color", correct: false },
+                    { text: "Connector fault, communication error, or power supply issues", correct: true },
+                    { text: "The user is wearing the wrong type of shoes", correct: false },
+                    { text: "It's raining outside", correct: false }
+                ],
+                explanation: "Technical problems can prevent charging even with proper authorization - like having a valid ticket to a concert but finding the venue has no power or equipment problems."
+            },
+            {
+                id: 15,
+                question: "What does 'reservationId: null' typically indicate in a Start Transaction?",
+                options: [
+                    { text: "The charging session is free", correct: false },
+                    { text: "This session was not started using a prior reservation", correct: true },
+                    { text: "The reservation system is broken", correct: false },
+                    { text: "The user has unlimited charging privileges", correct: false }
+                ],
+                explanation: "ReservationId: null means this is a walk-up session without prior booking - like showing up at a restaurant without a reservation versus having a table held for you."
+            },
+            {
+                id: 16,
+                question: "How does Start Transaction relate to customer billing?",
+                options: [
+                    { text: "Billing starts immediately when the message is sent", correct: true },
+                    { text: "Billing doesn't start until charging is complete", correct: false },
+                    { text: "Start Transaction has nothing to do with billing", correct: false },
+                    { text: "Billing only happens if the car reaches 100% charge", correct: false }
+                ],
+                explanation: "Start Transaction officially begins the billable session - like a taxi meter starting when you get in. From this moment, time and energy consumption start being tracked for billing."
+            },
+            {
+                id: 17,
+                question: "What's the difference between authorization and authentication in the Start Transaction process?",
+                options: [
+                    { text: "They are exactly the same thing", correct: false },
+                    { text: "Authentication verifies who you are, authorization checks if you're allowed to charge", correct: true },
+                    { text: "Authentication is for credit cards, authorization is for RFID", correct: false },
+                    { text: "Authorization happens first, then authentication", correct: false }
+                ],
+                explanation: "Authentication proves identity ('Are you who you claim to be?'), authorization grants permission ('Are you allowed to do this?'). Like showing ID (authentication) then checking if you're on the guest list (authorization)."
+            },
+            {
+                id: 18,
+                question: "What happens if the management system doesn't respond to a Start Transaction message?",
+                options: [
+                    { text: "Charging continues normally without tracking", correct: false },
+                    { text: "The charging station may retry or use offline authorization if configured", correct: true },
+                    { text: "The charging station immediately shuts down", correct: false },
+                    { text: "All other charging stations stop working", correct: false }
+                ],
+                explanation: "Modern charging stations have backup procedures - like having offline credit card processing when internet is down. They can operate temporarily offline or retry communication."
+            },
+            {
+                id: 19,
+                question: "In a multi-connector charging station, can multiple Start Transaction messages be active simultaneously?",
+                options: [
+                    { text: "No, only one car can charge at any station", correct: false },
+                    { text: "Yes, each connector can have its own active charging session", correct: true },
+                    { text: "Only during weekends and holidays", correct: false },
+                    { text: "Only if the cars are the same brand", correct: false }
+                ],
+                explanation: "Each connector operates independently - like having multiple gas pumps at a station. Multiple cars can charge simultaneously, each with their own Start Transaction and session tracking."
+            },
+            {
+                id: 20,
+                question: "What role does the vehicle play in the Start Transaction process?",
+                options: [
+                    { text: "The vehicle sends the Start Transaction message to the management system", correct: false },
+                    { text: "The vehicle must respond to communication and confirm readiness to charge", correct: true },
+                    { text: "The vehicle has no role - everything is handled by the charging station", correct: false },
+                    { text: "The vehicle determines the final billing amount", correct: false }
+                ],
+                explanation: "The vehicle is an active participant - it must communicate with the charging station, confirm it's ready to charge, and provide information about its charging capabilities and needs."
+            },
+            {
+                id: 21,
+                question: "Why is the timestamp in Start Transaction messages important?",
+                options: [
+                    { text: "It's only used for debugging purposes", correct: false },
+                    { text: "It establishes the official start time for billing and legal records", correct: true },
+                    { text: "It helps predict weather conditions", correct: false },
+                    { text: "It's required by the car manufacturer", correct: false }
+                ],
+                explanation: "The timestamp is like a legal document's date - it officially records when the charging session began for billing accuracy, dispute resolution, and compliance with regulations."
+            },
+            {
+                id: 22,
+                question: "What happens if a user walks away immediately after starting a transaction but leaves their car connected?",
+                options: [
+                    { text: "The transaction automatically cancels after 5 minutes", correct: false },
+                    { text: "Charging continues normally - the session is now active and tied to their account", correct: true },
+                    { text: "The charging station sends security alerts", correct: false },
+                    { text: "Other users can take over the session", correct: false }
+                ],
+                explanation: "Once Start Transaction is successful, the session belongs to that user until they end it - like leaving your car at a parking meter that you've already paid for."
+            },
+            {
+                id: 23,
+                question: "How does Start Transaction handle different types of charging speeds (slow vs fast)?",
+                options: [
+                    { text: "Start Transaction doesn't specify charging speed - that's determined separately", correct: true },
+                    { text: "Fast charging requires a different type of Start Transaction message", correct: false },
+                    { text: "Slow charging doesn't need Start Transaction at all", correct: false },
+                    { text: "The user must specify desired speed in the Start Transaction", correct: false }
+                ],
+                explanation: "Start Transaction just begins the session - charging speed is negotiated between the car and charger separately, like checking into a hotel doesn't determine which elevator you'll use."
+            },
+            {
+                id: 24,
+                question: "What security measures are built into the Start Transaction process?",
+                options: [
+                    { text: "Only facial recognition is used", correct: false },
+                    { text: "User authentication, encrypted communication, and session tracking", correct: true },
+                    { text: "Just asking the user to provide their phone number", correct: false },
+                    { text: "No security is needed since it's just electricity", correct: false }
+                ],
+                explanation: "Multiple security layers protect against unauthorized access and fraud: user verification, secure data transmission, and complete audit trails - like banking security for financial transactions."
+            },
+            {
+                id: 25,
+                question: "In what situation would you see multiple Start Transaction messages for the same user?",
+                options: [
+                    { text: "When the user is charging multiple vehicles at different connectors", correct: true },
+                    { text: "When the charging station is malfunctioning", correct: false },
+                    { text: "Only during software updates", correct: false },
+                    { text: "This never happens - one user can only have one active session", correct: false }
+                ],
+                explanation: "A user can charge multiple vehicles simultaneously at different connectors (like a fleet manager charging company cars), or charge one car while their family charges another nearby."
+            }
+        ];
+
+        let currentQuestions = [];
+        let selectedAnswers = {};
+        let submitted = false;
+
+        function generateRandomQuestions() {
+            // Shuffle the question bank and take first 5
+            const shuffled = [...questionBank].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, 5);
+        }
+
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+
+            currentQuestions.forEach((question, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question';
+                questionDiv.id = `q${question.id}`;
+
+                // Shuffle the options to randomize answer positions
+                const shuffledOptions = [...question.options];
+                for (let i = shuffledOptions.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
+                }
+
+                const optionsHtml = shuffledOptions.map((option, optIndex) => `
+                    <div class="option" onclick="selectOption(this, 'q${question.id}', ${option.correct})">
+                        <input type="radio" name="q${question.id}" value="${optIndex}" id="q${question.id}${String.fromCharCode(97 + optIndex)}">
+                        <label for="q${question.id}${String.fromCharCode(97 + optIndex)}">${option.text}</label>
+                    </div>
+                `).join('');
+
+                questionDiv.innerHTML = `
+                    <h3>
+                        <span class="question-number">${index + 1}</span>
+                        ${question.question}
+                    </h3>
+                    <div class="options">
+                        ${optionsHtml}
+                    </div>
+                    <div class="explanation">
+                        <h4>✅ Correct Answer: ${question.options.find(opt => opt.correct).text}</h4>
+                        <p>${question.explanation}</p>
+                    </div>
+                `;
+
+                container.appendChild(questionDiv);
+            });
+        }
+
+        function selectOption(element, questionId, isCorrect) {
+            if (submitted) return;
+
+            // Remove selection from other options in this question
+            const question = document.getElementById(questionId);
+            const options = question.querySelectorAll('.option');
+            options.forEach(opt => opt.classList.remove('selected'));
+
+            // Add selection to clicked option
+            element.classList.add('selected');
+            element.querySelector('input').checked = true;
+
+            // Store the answer
+            selectedAnswers[questionId] = isCorrect;
+        }
+
+        function submitQuiz() {
+            if (Object.keys(selectedAnswers).length < 5) {
+                alert('Please answer all questions before submitting!');
+                return;
+            }
+
+            submitted = true;
+            
+            // Calculate score
+            const correctAnswers = Object.values(selectedAnswers).filter(answer => answer === true).length;
+            const totalQuestions = 5;
+            const percentage = Math.round((correctAnswers / totalQuestions) * 100);
+
+            // Show correct/incorrect styling
+            currentQuestions.forEach(question => {
+                const questionDiv = document.getElementById(`q${question.id}`);
+                const options = questionDiv.querySelectorAll('.option');
+                
+                options.forEach((option, optIndex) => {
+                    const isSelected = option.classList.contains('selected');
+                    const optionText = option.querySelector('label').textContent;
+                    const isCorrect = question.options.some(opt => opt.text === optionText && opt.correct);
+                    
+                    if (isSelected) {
+                        if (selectedAnswers[`q${question.id}`]) {
+                            option.classList.add('correct');
+                        } else {
+                            option.classList.add('incorrect');
+                        }
+                    }
+                    
+                    // Highlight correct answer if wrong answer was selected
+                    if (isCorrect && !isSelected && selectedAnswers[`q${question.id}`] === false) {
+                        option.classList.add('correct');
+                    }
+                });
+            });
+
+            // Display results
+            const resultsDiv = document.getElementById('results');
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const feedbackText = document.getElementById('feedbackText');
+
+            scoreDisplay.textContent = `${correctAnswers}/${totalQuestions} (${percentage}%)`;
+            
+            if (percentage >= 80) {
+                scoreDisplay.className = 'score excellent';
+                feedbackText.textContent = '🎉 Excellent! You understand Start Transaction perfectly!';
+            } else if (percentage >= 60) {
+                scoreDisplay.className = 'score good';
+                feedbackText.textContent = '👍 Good job! You grasp the basics. Review the explanations to master the details.';
+            } else {
+                scoreDisplay.className = 'score needs-improvement';
+                feedbackText.textContent = '📚 Keep studying! Review the Start Transaction guide and try again to improve your understanding.';
+            }
+
+            resultsDiv.style.display = 'block';
+            document.getElementById('submitBtn').disabled = true;
+        }
+
+        function showExplanations() {
+            const explanations = document.querySelectorAll('.explanation');
+            explanations.forEach(exp => exp.classList.add('show'));
+        }
+
+        function resetQuiz() {
+            submitted = false;
+            selectedAnswers = {};
+            
+            // Reset all styling
+            const options = document.querySelectorAll('.option');
+            options.forEach(opt => {
+                opt.classList.remove('selected', 'correct', 'incorrect');
+                opt.querySelector('input').checked = false;
+            });
+
+            // Hide results and explanations
+            document.getElementById('results').style.display = 'none';
+            const explanations = document.querySelectorAll('.explanation');
+            explanations.forEach(exp => exp.classList.remove('show'));
+
+            // Re-enable submit button
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        function generateNewQuiz() {
+            // Reset everything
+            resetQuiz();
+            
+            // Generate new random questions
+            currentQuestions = generateRandomQuestions();
+            
+            // Render new questions
+            renderQuestions();
+        }
+
+        // Initialize quiz on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            currentQuestions = generateRandomQuestions();
+            renderQuestions();
+        });
+    </script>
+</body>
+</html>

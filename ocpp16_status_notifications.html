@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCPP 1.6 Status Notifications Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="1" fill="rgba(255,255,255,0.1)"/></svg>');
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .controls {
+            padding: 20px 40px;
+            background: rgba(79, 172, 254, 0.1);
+            border-bottom: 1px solid rgba(79, 172, 254, 0.2);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn.quiz {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn.quiz:hover {
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+        }
+
+        .btn.home {
+            background: linear-gradient(135deg, #4ffec9 0%, #00fe4c 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn.home:hover{
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 254, 146, 0.4);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(79, 172, 254, 0.1);
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .section-header:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .section-header .toggle {
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .section-header.collapsed .toggle {
+            transform: rotate(-90deg);
+        }
+
+        .section-content {
+            padding: 30px;
+            display: block;
+        }
+
+        .section-content.collapsed {
+            display: none;
+        }
+
+        .status-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .status-container.available {
+            border-left: 5px solid #27ae60;
+        }
+
+        .status-container.occupied {
+            border-left: 5px solid #3498db;
+        }
+
+        .status-container.error {
+            border-left: 5px solid #e74c3c;
+        }
+
+        .status-container.unavailable {
+            border-left: 5px solid #95a5a6;
+        }
+
+        .status-container.reserved {
+            border-left: 5px solid #f39c12;
+        }
+
+        .status-container.finishing {
+            border-left: 5px solid #9b59b6;
+        }
+
+        .status-container h3 {
+            color: #333;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-icon {
+            font-size: 1.8rem;
+            margin-right: 10px;
+        }
+
+        .copy-btn {
+            background: rgba(79, 172, 254, 0.1);
+            border: 1px solid #4facfe;
+            color: #4facfe;
+            padding: 5px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #4facfe;
+            color: white;
+        }
+
+        .status-container p {
+            margin-bottom: 12px;
+            color: #555;
+            font-size: 1rem;
+        }
+
+        .highlight {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 3px solid;
+        }
+
+        .highlight.available {
+            background: linear-gradient(120deg, rgba(39, 174, 96, 0.1) 0%, rgba(46, 204, 113, 0.1) 100%);
+            border-left-color: #27ae60;
+        }
+
+        .highlight.occupied {
+            background: linear-gradient(120deg, rgba(52, 152, 219, 0.1) 0%, rgba(41, 128, 185, 0.1) 100%);
+            border-left-color: #3498db;
+        }
+
+        .highlight.error {
+            background: linear-gradient(120deg, rgba(231, 76, 60, 0.1) 0%, rgba(192, 57, 43, 0.1) 100%);
+            border-left-color: #e74c3c;
+        }
+
+        .highlight.unavailable {
+            background: linear-gradient(120deg, rgba(149, 165, 166, 0.1) 0%, rgba(127, 140, 141, 0.1) 100%);
+            border-left-color: #95a5a6;
+        }
+
+        .highlight.reserved {
+            background: linear-gradient(120deg, rgba(243, 156, 18, 0.1) 0%, rgba(230, 126, 34, 0.1) 100%);
+            border-left-color: #f39c12;
+        }
+
+        .highlight.finishing {
+            background: linear-gradient(120deg, rgba(155, 89, 182, 0.1) 0%, rgba(142, 68, 173, 0.1) 100%);
+            border-left-color: #9b59b6;
+        }
+
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .overview-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(79, 172, 254, 0.2);
+        }
+
+        .overview-card h3 {
+            color: #4facfe;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 5px;
+                border-radius: 15px;
+                max-width: 100%;
+            }
+            
+            .header {
+                padding: 20px 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+                line-height: 1.2;
+                word-wrap: break-word;
+            }
+            
+            .header p {
+                font-size: 1rem;
+                word-wrap: break-word;
+            }
+            
+            .content {
+                padding: 15px;
+            }
+            
+            .controls {
+                padding: 10px;
+                gap: 10px;
+            }
+            
+            .btn {
+                padding: 8px 15px;
+                font-size: 0.8rem;
+                word-wrap: break-word;
+                min-width: auto;
+                white-space: normal;
+            }
+            
+            .section-header h2 {
+                font-size: 1.0rem;
+            }
+
+            .section-content {
+                padding: 15px;
+            }
+            
+            .status-container {
+                padding: 15px;
+            }
+            
+            .status-container h3 {
+                font-size: 1.1rem;
+                line-height: 1.3;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .copy-btn {
+                align-self: flex-end;
+            }
+            
+            .overview-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .overview-card {
+                padding: 20px;
+            }
+            
+            .overview-card h3 {
+                font-size: 1.1rem;
+            }
+            
+            pre {
+                font-size: 0.7rem !important;
+                overflow-x: auto !important;
+                white-space: pre !important;
+                word-wrap: normal !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                margin: 3px;
+                padding: 0;
+            }
+            
+            .header h1 {
+                font-size: 1.6rem;
+            }
+            
+            .content {
+                padding: 10px;
+            }
+            
+            .section-header h2 {
+                font-size: 0.85rem;
+            }
+            
+            .section-content {
+                padding: 10px;
+            }
+            
+            .status-container {
+                padding: 12px;
+            }
+            
+            .btn {
+                font-size: 0.7rem;
+                padding: 6px 12px;
+            }
+            
+            pre {
+                font-size: 0.6rem !important;
+                padding: 10px !important;
+            }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #4facfe;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📡 OCPP 1.6 Status Notifications Guide</h1>
+            <p>Understanding Charging Station Health & State Updates</p>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="expandAll()">📖 Expand All Sections</button>
+            <button class="btn" onclick="collapseAll()">📕 Collapse All Sections</button>
+            <a href="status_notifications_quiz.html" class="btn quiz">🧠 Test Your Knowledge - Quiz</a>
+            <a href="index.html" class="btn home">🏠 Back to Menu</a>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>🔍 What are Status Notifications?</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="overview-grid">
+                        <div class="overview-card">
+                            <span class="icon">📡</span>
+                            <h3>Definition</h3>
+                            <p>Status notifications are like regular health check-ups that charging stations send to the management system. They report current condition, availability, and any issues - similar to how your phone reports battery level and signal strength.</p>
+                        </div>
+                        <div class="overview-card">
+                            <span class="icon">⏰</span>
+                            <h3>When Sent</h3>
+                            <p>• When connector status changes<br>• During startup/shutdown<br>• When errors occur or are resolved<br>• Periodically as health checks<br>• After maintenance or updates</p>
+                        </div>
+                        <div class="overview-card">
+                            <span class="icon">🎯</span>
+                            <h3>Purpose</h3>
+                            <p>• <strong>Real-time monitoring:</strong> Know exactly what's happening<br>• <strong>Preventive maintenance:</strong> Detect problems early<br>• <strong>Customer experience:</strong> Show accurate availability<br>• <strong>Operational efficiency:</strong> Optimize resource allocation</p>
+                        </div>
+                        <div class="overview-card">
+                            <span class="icon">📋</span>
+                            <h3>Information Included</h3>
+                            <p>• Current status of each connector<br>• Error codes and descriptions<br>• Timestamp of status change<br>• Connector identification<br>• Additional diagnostic info</p>
+                        </div>
+                    </div>
+
+                    <div class="highlight available" style="margin-top: 30px;">
+                        <h3 style="color: #4facfe; margin-bottom: 15px;">📄 Example: Status Notification JSON Message</h3>
+                        <p style="margin-bottom: 15px;">Here's what a typical status notification looks like:</p>
+                        <pre style="background: rgba(0,0,0,0.05); padding: 20px; border-radius: 8px; overflow-x: auto; font-family: 'Courier New', monospace; line-height: 1.4; border-left: 4px solid #4facfe;"><code>{
+  "messageType": "StatusNotification",
+  "connectorId": 1,
+  "status": "Available",
+  "errorCode": "NoError",
+  "info": "Connector is ready for use",
+  "timestamp": "2025-08-07T14:30:00.000Z",
+  "vendorId": "EVBoxCorp",
+  "vendorErrorCode": "0x00"
+}</code></pre>
+                        <div style="margin-top: 15px; padding: 15px; background: rgba(39, 174, 96, 0.1); border-radius: 8px;">
+                            <p style="margin: 0; font-size: 0.9rem;"><strong>What this means:</strong> "At 2:30 PM on August 7th, connector #1 reported that it's available for use with no errors - everything is working normally and ready for the next customer."</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>✅ Available Status</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="status-container available">
+                        <h3><span class="status-icon">✅</span>Connector Ready for Use <button class="copy-btn" onclick="copyText('Available Status')">📋 Copy</button></h3>
+                        <p><strong>What it means:</strong> The charging connector is working perfectly and ready to charge vehicles.</p>
+                        <div class="highlight available">
+                            <h4 style="color: #27ae60; margin-bottom: 10px;">🔋 Real-World Example:</h4>
+                            <p>Like a gas pump with a green light showing "Ready" - everything is working normally, the connector is clean and undamaged, and customers can start charging immediately.</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">What This Status Indicates:</h4>
+                            <p>• <strong>Hardware OK:</strong> All electrical components working</p>
+                            <p>• <strong>Safety Systems Active:</strong> All protection systems operational</p>
+                            <p>• <strong>Network Connected:</strong> Can communicate with management system</p>
+                            <p>• <strong>Ready to Authorize:</strong> Can process user credentials</p>
+                            <p>• <strong>Clean & Safe:</strong> Connector is in good physical condition</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">Typical User Experience:</h4>
+                            <p>• Green light or "Available" message on display</p>
+                            <p>• Mobile apps show station as available</p>
+                            <p>• User can immediately start authorization process</p>
+                            <p>• Charging begins normally once car is connected</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>🔄 Preparing Status</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="status-container" style="border-left-color: #3498db;">
+                        <h3><span class="status-icon">🔄</span>Getting Ready to Charge <button class="copy-btn" onclick="copyText('Preparing Status')">📋 Copy</button></h3>
+                        <p><strong>What it means:</strong> The charging station is preparing to start a charging session - authorization was successful and the system is setting up for charging.</p>
+                        <div class="highlight" style="background: linear-gradient(120deg, rgba(52, 152, 219, 0.1) 0%, rgba(41, 128, 185, 0.1) 100%); border-left-color: #3498db;">
+                            <h4 style="color: #3498db; margin-bottom: 10px;">⚙️ Real-World Example:</h4>
+                            <p>Like the moment after you swipe your credit card at a gas station - the payment was approved and now the pump is getting ready to dispense fuel. Everything is being prepared for the main event.</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">What's Happening:</h4>
+                            <p>• <strong>User Authorized:</strong> Authentication was successful</p>
+                            <p>• <strong>System Check:</strong> Final safety and readiness verification</p>
+                            <p>• <strong>Connector Preparation:</strong> Getting charging port ready</p>
+                            <p>• <strong>Session Setup:</strong> Creating transaction records</p>
+                            <p>• <strong>Communication Test:</strong> Establishing link with vehicle</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">Typical User Experience:</h4>
+                            <p>• Blue pulsing light or "Preparing" message</p>
+                            <p>• Mobile apps show "Getting Ready..."</p>
+                            <p>• Usually lasts 5-15 seconds</p>
+                            <p>• User should connect cable during this time</p>
+                            <p>• Automatically progresses to "Charging" when ready</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>🔌 Charging Status</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="status-container occupied">
+                        <h3><span class="status-icon">🔌</span>Actively Charging Vehicle <button class="copy-btn" onclick="copyText('Charging Status')">📋 Copy</button></h3>
+                        <p><strong>What it means:</strong> A vehicle is connected and power is actively flowing - charging is in full progress.</p>
+                        <div class="highlight occupied">
+                            <h4 style="color: #3498db; margin-bottom: 10px;">⚡ Real-World Example:</h4>
+                            <p>Like fuel flowing through the gas pump nozzle into your car's tank - the main service is happening. Energy is being transferred from the grid to the car's battery at this very moment.</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">What's Happening:</h4>
+                            <p>• <strong>Power Flowing:</strong> Electricity actively transferring to vehicle</p>
+                            <p>• <strong>Meter Running:</strong> Energy consumption being tracked</p>
+                            <p>• <strong>Billing Active:</strong> Customer charges accumulating</p>
+                            <p>• <strong>Safety Monitoring:</strong> Continuous temperature and current checks</p>
+                            <p>• <strong>Progress Tracking:</strong> Monitoring charging speed and battery level</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">Typical User Experience:</h4>
+                            <p>• Bright blue or green light indicating active charging</p>
+                            <p>• Mobile apps show real-time charging progress</p>
+                            <p>• Display shows kW power level and time remaining</p>
+                            <p>• Other users see "In Use" with estimated end time</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>⏸️ SuspendedEV Status</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="status-container" style="border-left-color: #f39c12;">
+                        <h3><span class="status-icon">⏸️</span>Vehicle Paused Charging <button class="copy-btn" onclick="copyText('SuspendedEV Status')">📋 Copy</button></h3>
+                        <p><strong>What it means:</strong> The electric vehicle has temporarily paused the charging process - the session is still active but no power is flowing.</p>
+                        <div class="highlight" style="background: linear-gradient(120deg, rgba(243, 156, 18, 0.1) 0%, rgba(230, 126, 34, 0.1) 100%); border-left-color: #f39c12;">
+                            <h4 style="color: #f39c12; margin-bottom: 10px;">🔋 Real-World Example:</h4>
+                            <p>Like when your phone stops charging because the battery got too hot - the charger is ready and willing, but the device itself says "hold on, I need a moment." The session continues but power delivery is paused.</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">Common Reasons Vehicle Pauses:</h4>
+                            <p>• <strong>Battery Temperature:</strong> Battery too hot or too cold for safe charging</p>
+                            <p>• <strong>Battery Protection:</strong> Vehicle's battery management system takes a break</p>
+                            <p>• <strong>Charging Curve:</strong> Normal part of the charging algorithm</p>
+                            <p>• <strong>Cell Balancing:</strong> Ensuring all battery cells charge evenly</p>
+                            <p>• <strong>Thermal Management:</strong> Letting cooling systems catch up</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">Typical User Experience:</h4>
+                            <p>• Orange or yellow light, "Charging Paused" message</p>
+                            <p>• Mobile apps show "Vehicle Paused" with explanation</p>
+                            <p>• Power level shows 0kW but session continues</p>
+                            <p>• Usually resumes automatically after a few minutes</p>
+                            <p>• Time estimates may adjust based on pause duration</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>⏹️ SuspendedEVSE Status</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="status-container" style="border-left-color: #e67e22;">
+                        <h3><span class="status-icon">⏹️</span>Charging Station Paused Session <button class="copy-btn" onclick="copyText('SuspendedEVSE Status')">📋 Copy</button></h3>
+                        <p><strong>What it means:</strong> The charging station (EVSE) has temporarily suspended power delivery while keeping the session active.</p>
+                        <div class="highlight" style="background: linear-gradient(120deg, rgba(230, 126, 34, 0.1) 0%, rgba(211, 84, 0, 0.1) 100%); border-left-color: #e67e22;">
+                            <h4 style="color: #e67e22; margin-bottom: 10px;">🔧 Real-World Example:</h4>
+                            <p>Like a gas station temporarily stopping fuel flow because of high demand elsewhere - the pump is working fine and your car is ready, but the station needs to manage its resources or respond to external conditions.</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">Common Reasons Station Pauses:</h4>
+                            <p>• <strong>Load Management:</strong> Too many cars charging, need to share power</p>
+                            <p>• <strong>Grid Demand:</strong> Utility requests reduced consumption</p>
+                            <p>• <strong>Peak Hours:</strong> Automatic reduction during expensive periods</p>
+                            <p>• <strong>Temperature Control:</strong> Station equipment needs cooling break</p>
+                            <p>• <strong>Maintenance Mode:</strong> Brief system checks or updates</p>
+                            <p>• <strong>Emergency Response:</strong> Grid instability or safety concerns</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">Typical User Experience:</h4>
+                            <p>• Orange/amber light, "Station Paused" message</p>
+                            <p>• Mobile apps explain reason for pause</p>
+                            <p>• May show estimated resume time</p>
+                            <p>• Session remains active, billing typically paused</p>
+                            <p>• Automatically resumes when conditions improve</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>🚫 Unavailable Status</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="status-container unavailable">
+                        <h3><span class="status-icon">🚫</span>Out of Service <button class="copy-btn" onclick="copyText('Unavailable Status')">📋 Copy</button></h3>
+                        <p><strong>What it means:</strong> The connector cannot be used right now due to maintenance, configuration, or operational reasons.</p>
+                        <div class="highlight unavailable">
+                            <h4 style="color: #95a5a6; margin-bottom: 10px;">🔧 Real-World Example:</h4>
+                            <p>Like an elevator with an "Out of Order" sign - it's temporarily not working due to maintenance, updates, or technical issues. Users need to find another charger or wait until it's fixed.</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">Common Reasons:</h4>
+                            <p>• <strong>Scheduled Maintenance:</strong> Planned service or cleaning</p>
+                            <p>• <strong>Software Updates:</strong> Firmware upgrade in progress</p>
+                            <p>• <strong>Configuration Changes:</strong> Settings being modified</p>
+                            <p>• <strong>Power Issues:</strong> Electrical supply problems</p>
+                            <p>• <strong>Admin Disabled:</strong> Manually taken offline by operator</p>
+                            <p>• <strong>Safety Lockout:</strong> Precautionary shutdown</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">Typical User Experience:</h4>
+                            <p>• Gray light or "Out of Service" message</p>
+                            <p>• Mobile apps show station as unavailable</p>
+                            <p>• Authorization attempts are rejected</p>
+                            <p>• May show estimated return time</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>❌ Faulted Status</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="status-container error">
+                        <h3><span class="status-icon">❌</span>Equipment Malfunction <button class="copy-btn" onclick="copyText('Faulted Status')">📋 Copy</button></h3>
+                        <p><strong>What it means:</strong> The connector has detected a hardware or software problem that prevents normal operation.</p>
+                        <div class="highlight error">
+                            <h4 style="color: #e74c3c; margin-bottom: 10px;">⚠️ Real-World Example:</h4>
+                            <p>Like a car's check engine light - something is definitely wrong and needs attention. The charger has detected a problem that could be unsafe or prevent proper charging, so it's shut itself down for safety.</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">Types of Faults:</h4>
+                            <p>• <strong>Ground Fault:</strong> Electrical safety issue detected</p>
+                            <p>• <strong>Over Current:</strong> Too much electrical current flowing</p>
+                            <p>• <strong>Over Voltage:</strong> Dangerous voltage levels detected</p>
+                            <p>• <strong>Under Voltage:</strong> Insufficient power supply</p>
+                            <p>• <strong>Over Temperature:</strong> Equipment overheating</p>
+                            <p>• <strong>Connector Lock Failure:</strong> Can't secure connection</p>
+                            <p>• <strong>Reader Fault:</strong> Card reader malfunction</p>
+                            <p>• <strong>Internal Error:</strong> Software or hardware failure</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">Typical User Experience:</h4>
+                            <p>• Red light or "Error" message on display</p>
+                            <p>• Mobile apps show station as faulted</p>
+                            <p>• Error message explains the problem</p>
+                            <p>• Technical support automatically notified</p>
+                            <p>• May show contact information for help</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>📋 Reserved Status</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="status-container reserved">
+                        <h3><span class="status-icon">📋</span>Held for Specific User <button class="copy-btn" onclick="copyText('Reserved Status')">📋 Copy</button></h3>
+                        <p><strong>What it means:</strong> The connector is working but reserved for a specific user who made an advance booking.</p>
+                        <div class="highlight reserved">
+                            <h4 style="color: #f39c12; margin-bottom: 10px;">🎫 Real-World Example:</h4>
+                            <p>Like a restaurant table with a "Reserved" sign - it's available and working, but it's being held for someone who made a reservation. Other customers can't use it until the reservation expires or the reserved customer arrives.</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">How Reservations Work:</h4>
+                            <p>• <strong>Advance Booking:</strong> User reserves time slot via app</p>
+                            <p>• <strong>Time Limited:</strong> Reservation has specific start/end times</p>
+                            <p>• <strong>User-Specific:</strong> Only reserved user can start charging</p>
+                            <p>• <strong>Auto-Release:</strong> Becomes available if user doesn't arrive</p>
+                            <p>• <strong>Grace Period:</strong> Short buffer time for late arrivals</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">Typical User Experience:</h4>
+                            <p>• Orange light or "Reserved" message on display</p>
+                            <p>• Shows reservation end time</p>
+                            <p>• Mobile apps indicate when it becomes available</p>
+                            <p>• Reserved user gets priority access</p>
+                            <p>• Others see wait time estimate</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>🔄 Finishing Status</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="status-container finishing">
+                        <h3><span class="status-icon">🔄</span>Charging Session Ending <button class="copy-btn" onclick="copyText('Finishing Status')">📋 Copy</button></h3>
+                        <p><strong>What it means:</strong> A charging session is in the process of ending - the car has stopped charging but administrative cleanup is still happening.</p>
+                        <div class="highlight finishing">
+                            <h4 style="color: #9b59b6; margin-bottom: 10px;">🏁 Real-World Example:</h4>
+                            <p>Like checking out of a hotel - your stay is over but the front desk is still processing your final bill, returning your deposit, and preparing the room for the next guest. The main service is done but cleanup tasks remain.</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">What's Happening:</h4>
+                            <p>• <strong>Power Stopped:</strong> No more electricity flowing to vehicle</p>
+                            <p>• <strong>Final Calculations:</strong> Computing final energy consumption</p>
+                            <p>• <strong>Payment Processing:</strong> Finalizing customer charges</p>
+                            <p>• <strong>Transaction Closing:</strong> Completing all paperwork</p>
+                            <p>• <strong>System Updates:</strong> Updating availability status</p>
+                            <p>• <strong>Connector Reset:</strong> Preparing for next user</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">Typical User Experience:</h4>
+                            <p>• Purple/violet light or "Finishing" message</p>
+                            <p>• Current user sees "Session Ending" status</p>
+                            <p>• Other users see "Available Soon" message</p>
+                            <p>• Usually lasts only 10-30 seconds</p>
+                            <p>• Automatically becomes "Available" when done</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>❓ Unknown Status</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="status-container" style="border-left-color: #34495e;">
+                        <h3><span class="status-icon">❓</span>Status Cannot Be Determined <button class="copy-btn" onclick="copyText('Unknown Status')">📋 Copy</button></h3>
+                        <p><strong>What it means:</strong> The charging station cannot determine or report its current status accurately.</p>
+                        <div class="highlight" style="background: linear-gradient(120deg, rgba(52, 73, 94, 0.1) 0%, rgba(44, 62, 80, 0.1) 100%); border-left-color: #34495e;">
+                            <h4 style="color: #34495e; margin-bottom: 10px;">🤷 Real-World Example:</h4>
+                            <p>Like asking someone "How are you?" and they respond "I'm not sure" - the system knows something might be happening but can't figure out exactly what. It's a temporary confusion state that usually resolves quickly.</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">Common Causes:</h4>
+                            <p>• <strong>System Starting Up:</strong> Charger is booting and checking all systems</p>
+                            <p>• <strong>Status Transition:</strong> In the middle of changing from one status to another</p>
+                            <p>• <strong>Sensor Malfunction:</strong> Status detection hardware not working properly</p>
+                            <p>• <strong>Communication Delay:</strong> Temporary lag in internal system communication</p>
+                            <p>• <strong>Software Glitch:</strong> Brief confusion in status determination logic</p>
+                            <p>• <strong>Hardware Reset:</strong> Components restarting after maintenance or update</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">Typical User Experience:</h4>
+                            <p>• Dark gray light or "Status Unknown" message</p>
+                            <p>• Mobile apps show "Checking Status..." or loading indicator</p>
+                            <p>• Usually lasts only a few seconds to minutes</p>
+                            <p>• Automatically updates to proper status once determined</p>
+                            <p>• Users typically advised to wait or try another charger</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">When to Be Concerned:</h4>
+                            <p>• <strong>Brief (under 2 minutes):</strong> Usually normal, system is just figuring things out</p>
+                            <p>• <strong>Extended (over 5 minutes):</strong> May indicate hardware or software problem requiring support</p>
+                            <p>• <strong>Frequent Occurrences:</strong> Could signal underlying system reliability issues</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>🚨 Error Codes Explained</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="status-container error">
+                        <h3>ConnectorLockFailure <button class="copy-btn" onclick="copyText('ConnectorLockFailure')">📋 Copy</button></h3>
+                        <p><strong>What it means:</strong> The charging connector can't properly lock to the vehicle.</p>
+                        <div class="highlight error">
+                            <p><strong>Real-world impact:</strong> Like a gas pump nozzle that won't stay in your car - unsafe to charge because the connection isn't secure. Could cause sparks or disconnection during charging.</p>
+                        </div>
+                    </div>
+
+                    <div class="status-container error">
+                        <h3>EVCommunicationError <button class="copy-btn" onclick="copyText('EVCommunicationError')">📋 Copy</button></h3>
+                        <p><strong>What it means:</strong> The charger and the electric vehicle can't communicate properly.</p>
+                        <div class="highlight error">
+                            <p><strong>Real-world impact:</strong> Like trying to have a conversation with someone who doesn't speak your language - the charger doesn't know what the car needs or wants, so it can't charge safely.</p>
+                        </div>
+                    </div>
+
+                    <div class="status-container error">
+                        <h3>GroundFailure <button class="copy-btn" onclick="copyText('GroundFailure')">📋 Copy</button></h3>
+                        <p><strong>What it means:</strong> The electrical grounding system has a problem.</p>
+                        <div class="highlight error">
+                            <p><strong>Real-world impact:</strong> Like a house without proper electrical grounding - extremely dangerous! Could cause electric shock or fire. System immediately shuts down for safety.</p>
+                        </div>
+                    </div>
+
+                    <div class="status-container error">
+                        <h3>HighTemperature <button class="copy-btn" onclick="copyText('HighTemperature')">📋 Copy</button></h3>
+                        <p><strong>What it means:</strong> Equipment is overheating beyond safe limits.</p>
+                        <div class="highlight error">
+                            <p><strong>Real-world impact:</strong> Like a computer overheating and shutting down - components could be damaged or cause fire. System stops charging and cools down before resuming.</p>
+                        </div>
+                    </div>
+
+                    <div class="status-container error">
+                        <h3>InternalError <button class="copy-btn" onclick="copyText('InternalError')">📋 Copy</button></h3>
+                        <p><strong>What it means:</strong> The charger's internal systems have malfunctioned.</p>
+                        <div class="highlight error">
+                            <p><strong>Real-world impact:</strong> Like your phone freezing or crashing - the system needs to restart or be repaired. Often requires technical support to diagnose and fix.</p>
+                        </div>
+                    </div>
+
+                    <div class="status-container error">
+                        <h3>LocalListConflict <button class="copy-btn" onclick="copyText('LocalListConflict')">📋 Copy</button></h3>
+                        <p><strong>What it means:</strong> The local user database conflicts with the central system.</p>
+                        <div class="highlight error">
+                            <p><strong>Real-world impact:</strong> Like having two different guest lists for the same party - confusion about who's authorized. May accept some cards and reject others unpredictably.</p>
+                        </div>
+                    </div>
+
+                    <div class="status-container error">
+                        <h3>NoError <button class="copy-btn" onclick="copyText('NoError')">📋 Copy</button></h3>
+                        <p><strong>What it means:</strong> Everything is working normally - no problems detected.</p>
+                        <div class="highlight available">
+                            <p><strong>Real-world impact:</strong> Like getting a clean bill of health from your doctor - all systems operating normally and ready to serve customers.</p>
+                        </div>
+                    </div>
+
+                    <div class="status-container error">
+                        <h3>OtherError <button class="copy-btn" onclick="copyText('OtherError')">📋 Copy</button></h3>
+                        <p><strong>What it means:</strong> An error occurred that doesn't fit the standard categories.</p>
+                        <div class="highlight error">
+                            <p><strong>Real-world impact:</strong> Like "other" on a medical form - something's wrong but it's unusual or complex. Usually requires human investigation to diagnose.</p>
+                        </div>
+                    </div>
+
+                    <div class="status-container error">
+                        <h3>OverCurrentFailure <button class="copy-btn" onclick="copyText('OverCurrentFailure')">📋 Copy</button></h3>
+                        <p><strong>What it means:</strong> Too much electrical current is flowing, exceeding safety limits.</p>
+                        <div class="highlight error">
+                            <p><strong>Real-world impact:</strong> Like a garden hose with too much water pressure - could damage equipment or cause safety hazards. Circuit breakers shut down charging immediately.</p>
+                        </div>
+                    </div>
+
+                    <div class="status-container error">
+                        <h3>PowerMeterFailure <button class="copy-btn" onclick="copyText('PowerMeterFailure')">📋 Copy</button></h3>
+                        <p><strong>What it means:</strong> The system that measures energy consumption isn't working.</p>
+                        <div class="highlight error">
+                            <p><strong>Real-world impact:</strong> Like a broken fuel gauge - can't measure how much energy is being delivered, so billing becomes impossible. Charging usually stops for accuracy.</p>
+                        </div>
+                    </div>
+
+                    <div class="status-container error">
+                        <h3>PowerSwitchFailure <button class="copy-btn" onclick="copyText('PowerSwitchFailure')">📋 Copy</button></h3>
+                        <p><strong>What it means:</strong> The main power switch can't be controlled properly.</p>
+                        <div class="highlight error">
+                            <p><strong>Real-world impact:</strong> Like a light switch that's stuck - can't turn power on or off when needed. Very dangerous because charging can't be stopped in emergency.</p>
+                        </div>
+                    </div>
+
+                    <div class="status-container error">
+                        <h3>ReaderFailure <button class="copy-btn" onclick="copyText('ReaderFailure')">📋 Copy</button></h3>
+                        <p><strong>What it means:</strong> The RFID card reader or other identification system isn't working.</p>
+                        <div class="highlight error">
+                            <p><strong>Real-world impact:</strong> Like a credit card reader that won't work at a store - customers can't identify themselves to start charging. Station may accept other payment methods.</p>
+                        </div>
+                    </div>
+
+                    <div class="status-container error">
+                        <h3>ResetFailure <button class="copy-btn" onclick="copyText('ResetFailure')">📋 Copy</button></h3>
+                        <p><strong>What it means:</strong> The system tried to restart but couldn't complete the process.</p>
+                        <div class="highlight error">
+                            <p><strong>Real-world impact:</strong> Like a computer that gets stuck during startup - partially working but not fully operational. Usually needs technical support to resolve.</p>
+                        </div>
+                    </div>
+
+                    <div class="status-container error">
+                        <h3>UnderVoltage <button class="copy-btn" onclick="copyText('UnderVoltage')">📋 Copy</button></h3>
+                        <p><strong>What it means:</strong> The electrical supply voltage is too low for safe charging.</p>
+                        <div class="highlight error">
+                            <p><strong>Real-world impact:</strong> Like low water pressure in your shower - not enough electrical "pressure" to charge effectively or safely. May charge very slowly or not at all.</p>
+                        </div>
+                    </div>
+
+                    <div class="status-container error">
+                        <h3>WeakSignal <button class="copy-btn" onclick="copyText('WeakSignal')">📋 Copy</button></h3>
+                        <p><strong>What it means:</strong> Poor communication signal between charger and management system.</p>
+                        <div class="highlight error">
+                            <p><strong>Real-world impact:</strong> Like having bad cell phone reception - can still work but communication is unreliable. May cause delays in authorization or reporting.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>📚 Summary</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="highlight available">
+                        <p><strong>Key Takeaway:</strong> Status notifications are the vital signs of charging stations - they tell operators and users exactly what's happening, whether everything is working normally, and when problems need attention. Like traffic lights, they use simple signals to communicate complex information.</p>
+                    </div>
+                    <div class="overview-grid">
+                        <div class="overview-card">
+                            <span class="icon">✅</span>
+                            <h3>What We Learned</h3>
+                            <p>• 9 official OCPP 1.6 status types per protocol<br>• Each status shows specific connector condition<br>• Status transitions follow defined patterns<br>• Error codes provide detailed problem information</p>
+                        </div>
+                        <div class="overview-card">
+                            <span class="icon">🎯</span>
+                            <h3>Real-World Impact</h3>
+                            <p>• Better customer experience through accurate info<br>• Faster problem resolution and maintenance<br>• Improved operational efficiency<br>• Enhanced safety through error monitoring</p>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 30px;">
+                        <a href="status_notifications_quiz.html" class="btn quiz" style="font-size: 1.1rem; padding: 15px 30px;">
+                            🧠 Ready to Test Your Knowledge? Take the Quiz! 
+                        </a>
+                        <a href="index.html" class="btn home" style="font-size: 1.1rem; padding: 15px 30px;">🏠 Back to Menu</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">
+        Copied to clipboard! ✅
+    </div>
+
+    <script>
+        function toggleSection(header) {
+            const content = header.nextElementSibling;
+            const toggle = header.querySelector('.toggle');
+            
+            header.classList.toggle('collapsed');
+            content.classList.toggle('collapsed');
+        }
+
+        function expandAll() {
+            const headers = document.querySelectorAll('.section-header');
+            const contents = document.querySelectorAll('.section-content');
+            
+            headers.forEach(header => header.classList.remove('collapsed'));
+            contents.forEach(content => content.classList.remove('collapsed'));
+        }
+
+        function collapseAll() {
+            const headers = document.querySelectorAll('.section-header');
+            const contents = document.querySelectorAll('.section-content');
+            
+            headers.forEach(header => header.classList.add('collapsed'));
+            contents.forEach(content => content.classList.add('collapsed'));
+        }
+
+        function copyText(statusName) {
+            const section = event.target.closest('.section');
+            const sectionTitle = section.querySelector('.section-header h2').textContent;
+            const copyText = `${sectionTitle} - ${statusName}`;
+            
+            navigator.clipboard.writeText(copyText).then(() => {
+                showToast();
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = copyText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast();
+            });
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Initialize with all sections collapsed
+        document.addEventListener('DOMContentLoaded', () => {
+            collapseAll();
+        });
+    </script>
+</body>
+</html>

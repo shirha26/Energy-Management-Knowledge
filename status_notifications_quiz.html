@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCPP 1.6 Status Notifications Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .quiz-info {
+            background: rgba(79, 172, 254, 0.1);
+            padding: 20px 40px;
+            text-align: center;
+            border-bottom: 1px solid rgba(79, 172, 254, 0.2);
+        }
+
+        .quiz-info p {
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .quiz-content {
+            padding: 40px;
+        }
+
+        .question {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #9b59b6;
+        }
+
+        .question h3 {
+            color: #333;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .question-number {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            background: rgba(79, 172, 254, 0.05);
+            border: 2px solid rgba(79, 172, 254, 0.2);
+            border-radius: 10px;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .option:hover {
+            background: rgba(79, 172, 254, 0.1);
+            border-color: #4facfe;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            background: rgba(79, 172, 254, 0.2);
+            border-color: #4facfe;
+            color: #333;
+        }
+
+        .option.correct {
+            background: rgba(46, 204, 113, 0.2);
+            border-color: #2ecc71;
+            color: #27ae60;
+        }
+
+        .option.incorrect {
+            background: rgba(231, 76, 60, 0.2);
+            border-color: #e74c3c;
+            color: #c0392b;
+        }
+
+        .option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #4facfe;
+        }
+
+        .option label {
+            cursor: pointer;
+            flex: 1;
+            font-size: 1rem;
+        }
+
+        .controls {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn.home {
+            background: linear-gradient(135deg, #4ffec9 0%, #00fe4c 100%);
+            color: white;
+        }
+
+        .btn.home:hover{
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 254, 146, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+        }
+
+        .btn.back {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn.back:hover {
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+        }
+
+        .results {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            display: none;
+        }
+
+        .score {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .score.excellent {
+            color: #27ae60;
+        }
+
+        .score.good {
+            color: #f39c12;
+        }
+
+        .score.needs-improvement {
+            color: #e74c3c;
+        }
+
+        .feedback {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .explanation {
+            background: rgba(79, 172, 254, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+            text-align: left;
+            display: none;
+        }
+
+        .explanation h4 {
+            color: #4facfe;
+            margin-bottom: 10px;
+        }
+
+        .explanation.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 8px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 25px 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .header p {
+                font-size: 1rem;
+            }
+
+            .quiz-content {
+                padding: 15px;
+            }
+
+            .question h3 { 
+                font-size: 1.1rem;
+                line-height: 1.3;
+            }
+            
+            .question {
+                padding: 18px;
+            }
+            
+            .controls {
+                padding: 12px;
+                gap: 8px;
+            }
+            
+            .btn {
+                padding: 8px 16px;
+                font-size: 0.85rem;
+                margin: 2px;
+                min-width: 100px;
+            }
+
+            .option label {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .header p {
+                font-size: 0.9rem;
+            }
+            
+            .quiz-content {
+                padding: 12px;
+            }
+            
+            .question {
+                padding: 15px;
+            }
+            
+            .question h3 {
+                font-size: 1rem;
+                line-height: 1.2;
+            }
+            
+            .btn {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+                min-width: 90px;
+            }
+            
+            .option {
+                padding: 12px 15px;
+            }
+            
+            .option label {
+                font-size: 0.85rem;
+                line-height: 1.3;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            
+            .quiz-content {
+                padding: 10px;
+            }
+            
+            .question {
+                padding: 12px;
+            }
+            
+            .question h3 {
+                font-size: 0.9rem;
+            }
+            
+            .btn {
+                font-size: 0.75rem;
+                padding: 5px 10px;
+                min-width: 80px;
+            }
+            
+            .option label {
+                font-size: 0.8rem;
+            }
+            
+            .option {
+                padding: 10px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📡 Status Notifications Quiz</h1>
+            <p>Test your understanding of Charging Station Health & State Updates</p>
+        </div>
+
+        <div class="quiz-info">
+            <p>⚡ <strong>Randomized Quiz:</strong> 5 questions selected from a bank of 30 questions | Each attempt will have different questions</p>
+            <div style="margin-top: 15px;">
+                <a href="ocpp16_status_notifications.html" class="btn back">
+                    📖 Back to Status Notifications Guide
+                </a>
+                <a href="index.html" class="btn home">🏠 Back to Menu</a>
+            </div>
+        </div>
+
+        <div class="quiz-content">
+            <div id="questionsContainer">
+                <!-- Questions will be dynamically inserted here -->
+            </div>
+
+            <div class="controls">
+                <button class="btn" onclick="submitQuiz()" id="submitBtn">📝 Submit Quiz</button>
+                <button class="btn secondary" onclick="generateNewQuiz()" id="newQuizBtn">🎲 New Random Quiz</button>
+                <button class="btn secondary" onclick="resetQuiz()" id="resetBtn">🔄 Reset Current Quiz</button>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="ocpp16_status_notifications.html" class="btn back">📖 Back to Guide</a>
+                <a href="index.html" class="btn home">🏠 Back to Menu</a>
+            </div>
+
+            <div class="results" id="results">
+                <div class="score" id="scoreDisplay"></div>
+                <div class="feedback" id="feedbackText"></div>
+                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 20px;">
+                    <button class="btn" onclick="showExplanations()">💡 View Explanations</button>
+                    <a href="ocpp16_status_notifications.html" class="btn back">📖 Review Study Guide</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Bank of 30 questions about Status Notifications
+        const questionBank = [
+            {
+                id: 1,
+                question: "What is the best analogy to understand Status Notifications?",
+                options: [
+                    { text: "Like regular health check-ups that report on the charging station's condition", correct: true },
+                    { text: "Like sending postcards from vacation", correct: false },
+                    { text: "Like ordering food at a restaurant", correct: false },
+                    { text: "Like watching movies on Netflix", correct: false }
+                ],
+                explanation: "Status notifications are like health check-ups - they regularly report the charging station's current condition, any issues, and overall health to the management system."
+            },
+            {
+                id: 2,
+                question: "What does 'Available' status mean for a charging connector?",
+                options: [
+                    { text: "The connector is broken but can still be used", correct: false },
+                    { text: "The connector is working perfectly and ready to charge vehicles", correct: true },
+                    { text: "The connector is being cleaned by maintenance staff", correct: false },
+                    { text: "The connector is reserved for emergency use only", correct: false }
+                ],
+                explanation: "Available means the connector is fully operational, safe, and ready for immediate use - like a green light indicating everything is working normally."
+            },
+            {
+                id: 3,
+                question: "When would you typically see 'Preparing' status?",
+                options: [
+                    { text: "When the station is being installed for the first time", correct: false },
+                    { text: "After user authorization is successful and the system is setting up for charging", correct: true },
+                    { text: "During monthly maintenance visits", correct: false },
+                    { text: "When the station is permanently shutting down", correct: false }
+                ],
+                explanation: "Preparing appears after successful user authorization while the system performs final checks and sets up the charging session - like the moment after payment approval while setting up service."
+            },
+            {
+                id: 4,
+                question: "What's the difference between 'SuspendedEV' and 'SuspendedEVSE' statuses?",
+                options: [
+                    { text: "SuspendedEV means the vehicle paused charging, SuspendedEVSE means the station paused charging", correct: true },
+                    { text: "They mean exactly the same thing", correct: false },
+                    { text: "SuspendedEV is temporary, SuspendedEVSE is permanent", correct: false },
+                    { text: "SuspendedEV is for AC charging, SuspendedEVSE is for DC charging", correct: false }
+                ],
+                explanation: "SuspendedEV means the car itself paused charging (e.g., battery too hot), while SuspendedEVSE means the charging station suspended the session (e.g., load management)."
+            },
+            {
+                id: 5,
+                question: "What does 'Faulted' status indicate?",
+                options: [
+                    { text: "The connector is temporarily busy with another customer", correct: false },
+                    { text: "Equipment malfunction that prevents normal operation", correct: true },
+                    { text: "The station is undergoing planned maintenance", correct: false },
+                    { text: "The station is operating at reduced capacity", correct: false }
+                ],
+                explanation: "Faulted indicates hardware or software problems that prevent safe operation - like a car's check engine light warning of mechanical issues."
+            },
+            {
+                id: 6,
+                question: "What does 'errorCode: NoError' mean in a status notification?",
+                options: [
+                    { text: "The system is checking for errors", correct: false },
+                    { text: "All systems are operating normally with no problems detected", correct: true },
+                    { text: "Minor errors are present but can be ignored", correct: false },
+                    { text: "Error checking is disabled", correct: false }
+                ],
+                explanation: "NoError means everything is working normally - like getting a clean bill of health from your doctor with no issues found."
+            },
+            {
+                id: 7,
+                question: "When might you see 'Reserved' status?",
+                options: [
+                    { text: "When a specific user has made an advance booking for that connector", correct: true },
+                    { text: "When the connector is out of service for repairs", correct: false },
+                    { text: "When charging is limited to premium customers only", correct: false },
+                    { text: "When the station is operating in emergency mode", correct: false }
+                ],
+                explanation: "Reserved means the connector is held for a user who made an advance reservation - like a restaurant table with a 'Reserved' sign."
+            },
+            {
+                id: 8,
+                question: "What does 'Finishing' status represent?",
+                options: [
+                    { text: "The charging station is permanently closing", correct: false },
+                    { text: "A charging session is ending but administrative cleanup is still happening", correct: true },
+                    { text: "The connector is being physically removed", correct: false },
+                    { text: "Daily operations are ending for the night", correct: false }
+                ],
+                explanation: "Finishing means charging has stopped but final billing calculations and system cleanup are in progress - like hotel checkout where your stay is over but paperwork continues."
+            },
+            {
+                id: 9,
+                question: "What does 'ConnectorLockFailure' error code indicate?",
+                options: [
+                    { text: "The building's security system is malfunctioning", correct: false },
+                    { text: "The charging connector cannot properly secure to the vehicle", correct: true },
+                    { text: "Someone tried to break into the charging station", correct: false },
+                    { text: "The payment card reader is jammed", correct: false }
+                ],
+                explanation: "ConnectorLockFailure means the physical connector can't lock securely to the car - unsafe for charging, like a gas pump nozzle that won't stay properly connected."
+            },
+            {
+                id: 10,
+                question: "Why would you see 'GroundFailure' as an error code?",
+                options: [
+                    { text: "Someone dug up the ground around the station", correct: false },
+                    { text: "The electrical grounding system has a dangerous safety problem", correct: true },
+                    { text: "The station is built on unstable ground", correct: false },
+                    { text: "Underground cables are damaged", correct: false }
+                ],
+                explanation: "GroundFailure indicates problems with electrical safety grounding - extremely dangerous, like a house without proper electrical grounding that could cause shock or fire."
+            },
+            {
+                id: 11,
+                question: "What does 'Unknown' status mean?",
+                options: [
+                    { text: "The charging station has never been configured", correct: false },
+                    { text: "The system cannot determine its current status accurately", correct: true },
+                    { text: "The station is operating in stealth mode", correct: false },
+                    { text: "New status types that haven't been programmed yet", correct: false }
+                ],
+                explanation: "Unknown means the system is temporarily confused about its state - usually during startup, transitions, or brief system glitches. Like asking someone 'How are you?' and they respond 'I'm not sure.'"
+            },
+            {
+                id: 12,
+                question: "How often are status notifications typically sent?",
+                options: [
+                    { text: "Only once per day as a summary report", correct: false },
+                    { text: "When connector status changes, during startup/shutdown, when errors occur, and periodically", correct: true },
+                    { text: "Only when customers complain about problems", correct: false },
+                    { text: "Exactly every hour on the hour", correct: false }
+                ],
+                explanation: "Status notifications are event-driven (sent when something changes) plus periodic health checks - like getting updates when something important happens plus regular check-ins."
+            },
+            {
+                id: 13,
+                question: "What does 'HighTemperature' error indicate?",
+                options: [
+                    { text: "The weather outside is too hot for charging", correct: false },
+                    { text: "Charging equipment is overheating beyond safe operating limits", correct: true },
+                    { text: "The customer's coffee is too hot", correct: false },
+                    { text: "The station's display screen is too bright", correct: false }
+                ],
+                explanation: "HighTemperature means equipment components are dangerously hot and could be damaged or cause fire - like a computer overheating and shutting down for protection."
+            },
+            {
+                id: 14,
+                question: "What is 'EVCommunicationError' referring to?",
+                options: [
+                    { text: "The car owner is not responding to text messages", correct: false },
+                    { text: "The charger and electric vehicle cannot communicate properly", correct: true },
+                    { text: "The station's internet connection is down", correct: false },
+                    { text: "The display screen is showing wrong information", correct: false }
+                ],
+                explanation: "EVCommunicationError means the charging station and car can't 'talk' to each other - like trying to have a conversation with someone who doesn't speak your language."
+            },
+            {
+                id: 15,
+                question: "Why would 'PowerMeterFailure' cause a status notification?",
+                options: [
+                    { text: "The electric company's main power meter is broken", correct: false },
+                    { text: "The system that measures energy consumption isn't working, making billing impossible", correct: true },
+                    { text: "Someone stole the power meter", correct: false },
+                    { text: "The meter is working but reading zero", correct: false }
+                ],
+                explanation: "PowerMeterFailure means the energy measurement system is broken - can't accurately bill customers, like a broken taxi meter that can't track fare."
+            },
+            {
+                id: 16,
+                question: "What does 'Unavailable' status typically mean?",
+                options: [
+                    { text: "The connector is out of service due to maintenance, configuration, or operational reasons", correct: true },
+                    { text: "The connector is charging a vehicle", correct: false },
+                    { text: "The connector is available but customers must pay extra", correct: false },
+                    { text: "The connector only works on weekends", correct: false }
+                ],
+                explanation: "Unavailable means the connector cannot be used right now for planned reasons - like an elevator with an 'Out of Order' sign during maintenance."
+            },
+            {
+                id: 17,
+                question: "How do status notifications help with preventive maintenance?",
+                options: [
+                    { text: "They only report problems after equipment completely fails", correct: false },
+                    { text: "They can detect early warning signs of problems before complete failure", correct: true },
+                    { text: "They provide weather forecasts for maintenance planning", correct: false },
+                    { text: "They schedule maintenance automatically without human input", correct: false }
+                ],
+                explanation: "Status notifications can show trends like increasing temperatures or intermittent errors - early warning signs that help fix problems before they cause complete failures."
+            },
+            {
+                id: 18,
+                question: "What does 'ReaderFailure' mean?",
+                options: [
+                    { text: "Someone can't read the instructions on the station", correct: false },
+                    { text: "The RFID card reader or identification system isn't working", correct: true },
+                    { text: "The display screen text is too small", correct: false },
+                    { text: "The station's library of user manuals is corrupted", correct: false }
+                ],
+                explanation: "ReaderFailure means the card reader or other user identification system is broken - like a credit card reader that won't work at a store checkout."
+            },
+            {
+                id: 19,
+                question: "Why is the timestamp important in status notifications?",
+                options: [
+                    { text: "It helps schedule maintenance during off-peak hours", correct: false },
+                    { text: "It provides precise timing for troubleshooting and understanding problem sequences", correct: true },
+                    { text: "It determines billing rates based on time of day", correct: false },
+                    { text: "It's only used for data storage organization", correct: false }
+                ],
+                explanation: "Timestamps help operators understand when problems occurred and in what sequence - essential for troubleshooting complex issues and understanding failure patterns."
+            },
+            {
+                id: 20,
+                question: "What does 'OverCurrentFailure' indicate?",
+                options: [
+                    { text: "Too many customers are trying to charge at once", correct: false },
+                    { text: "Electrical current exceeding safe limits, creating danger", correct: true },
+                    { text: "The current weather is interfering with charging", correct: false },
+                    { text: "Current trends in EV charging are overwhelming the system", correct: false }
+                ],
+                explanation: "OverCurrentFailure means dangerous amounts of electrical current are flowing - like water pressure that's too high and could burst pipes. Safety systems shut down immediately."
+            },
+            {
+                id: 21,
+                question: "How do mobile apps use status notification information?",
+                options: [
+                    { text: "Apps ignore status notifications completely", correct: false },
+                    { text: "They show users real-time availability and any issues at charging stations", correct: true },
+                    { text: "Apps only show status information to maintenance technicians", correct: false },
+                    { text: "Status notifications are only for internal company use", correct: false }
+                ],
+                explanation: "Mobile apps translate status notifications into user-friendly information - showing which stations are available, which are in use, and which have problems."
+            },
+            {
+                id: 22,
+                question: "What does 'UnderVoltage' error mean?",
+                options: [
+                    { text: "The charging station doesn't have enough electricity supply pressure to charge safely", correct: true },
+                    { text: "The customer's car battery voltage is too low", correct: false },
+                    { text: "The station is not getting enough customers", correct: false },
+                    { text: "The display screen brightness is too low", correct: false }
+                ],
+                explanation: "UnderVoltage means insufficient electrical 'pressure' - like low water pressure in your shower, there's not enough electrical force to charge effectively or safely."
+            },
+            {
+                id: 23,
+                question: "Why might you see frequent status changes between 'Available' and 'Unknown'?",
+                options: [
+                    { text: "This is normal behavior and indicates good system health", correct: false },
+                    { text: "It suggests system instability or communication problems that need attention", correct: true },
+                    { text: "The station is automatically testing itself", correct: false },
+                    { text: "Customers are connecting and disconnecting very quickly", correct: false }
+                ],
+                explanation: "Frequent status changes usually indicate underlying problems - communication issues, sensor malfunctions, or system instability that needs investigation and repair."
+            },
+            {
+                id: 24,
+                question: "What does 'WeakSignal' error typically refer to?",
+                options: [
+                    { text: "Poor communication signal between charging station and management system", correct: true },
+                    { text: "The customer's cell phone has weak signal", correct: false },
+                    { text: "The charging power is too low", correct: false },
+                    { text: "The station's WiFi password is weak", correct: false }
+                ],
+                explanation: "WeakSignal means poor connectivity between the charging station and its management system - like having bad cell phone reception during an important call."
+            },
+            {
+                id: 25,
+                question: "How do status notifications contribute to customer experience?",
+                options: [
+                    { text: "They don't affect customers since they're only technical messages", correct: false },
+                    { text: "They enable accurate real-time information about station availability and issues", correct: true },
+                    { text: "They only matter for billing purposes", correct: false },
+                    { text: "Status notifications are only used for legal compliance", correct: false }
+                ],
+                explanation: "Status notifications directly impact customer experience by providing accurate, real-time information about which stations are working, available, or have issues."
+            },
+            {
+                id: 26,
+                question: "What does 'InternalError' suggest about a charging station?",
+                options: [
+                    { text: "Someone is inside the station without permission", correct: false },
+                    { text: "The station's internal software or hardware systems have malfunctioned", correct: true },
+                    { text: "There are internal company policy violations", correct: false },
+                    { text: "The station is being used for internal testing only", correct: false }
+                ],
+                explanation: "InternalError means the station's computer or control systems have problems - like your phone freezing or crashing, requiring restart or technical support."
+            },
+            {
+                id: 27,
+                question: "Why would 'PowerSwitchFailure' be particularly dangerous?",
+                options: [
+                    { text: "The lights won't turn on at the station", correct: false },
+                    { text: "The main power control switch can't be turned on/off when needed, preventing emergency shutdown", correct: true },
+                    { text: "Customers can't switch between different charging speeds", correct: false },
+                    { text: "The station can't switch between day and night modes", correct: false }
+                ],
+                explanation: "PowerSwitchFailure means the main power control is stuck - like a light switch that won't turn off. Very dangerous because power can't be stopped in emergencies."
+            },
+            {
+                id: 28,
+                question: "What operational benefit do status notifications provide to charging network operators?",
+                options: [
+                    { text: "They reduce electricity costs automatically", correct: false },
+                    { text: "They enable proactive problem resolution and efficient resource allocation", correct: true },
+                    { text: "They eliminate the need for customer support", correct: false },
+                    { text: "They guarantee 100% uptime for all stations", correct: false }
+                ],
+                explanation: "Status notifications allow operators to spot problems early, dispatch maintenance efficiently, and allocate resources where needed - improving overall network reliability."
+            },
+            {
+                id: 29,
+                question: "How long does 'Finishing' status typically last?",
+                options: [
+                    { text: "Several hours while deep cleaning occurs", correct: false },
+                    { text: "Usually 10-30 seconds for final calculations and system reset", correct: true },
+                    { text: "Until the next business day", correct: false },
+                    { text: "It varies based on how much energy was consumed", correct: false }
+                ],
+                explanation: "Finishing is brief - just long enough to complete billing calculations, update records, and reset the connector for the next user, similar to processing a credit card transaction."
+            },
+            {
+                id: 30,
+                question: "What does 'OtherError' typically indicate?",
+                options: [
+                    { text: "Another charging station is causing interference", correct: false },
+                    { text: "An error occurred that doesn't fit into standard error categories", correct: true },
+                    { text: "Multiple different errors happened simultaneously", correct: false },
+                    { text: "The error is being kept secret for security reasons", correct: false }
+                ],
+                explanation: "OtherError is a catch-all for unusual problems not covered by standard error codes - like 'other' on a medical form for uncommon conditions requiring human investigation."
+            }
+        ];
+
+        let currentQuestions = [];
+        let selectedAnswers = {};
+        let submitted = false;
+
+        function generateRandomQuestions() {
+            // Shuffle the question bank and take first 5
+            const shuffled = [...questionBank].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, 5);
+        }
+
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+
+            currentQuestions.forEach((question, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question';
+                questionDiv.id = `q${question.id}`;
+
+                // Shuffle the options to randomize answer positions
+                const shuffledOptions = [...question.options];
+                for (let i = shuffledOptions.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
+                }
+
+                const optionsHtml = shuffledOptions.map((option, optIndex) => `
+                    <div class="option" onclick="selectOption(this, 'q${question.id}', ${option.correct})">
+                        <input type="radio" name="q${question.id}" value="${optIndex}" id="q${question.id}${String.fromCharCode(97 + optIndex)}">
+                        <label for="q${question.id}${String.fromCharCode(97 + optIndex)}">${option.text}</label>
+                    </div>
+                `).join('');
+
+                questionDiv.innerHTML = `
+                    <h3>
+                        <span class="question-number">${index + 1}</span>
+                        ${question.question}
+                    </h3>
+                    <div class="options">
+                        ${optionsHtml}
+                    </div>
+                    <div class="explanation">
+                        <h4>✅ Correct Answer: ${question.options.find(opt => opt.correct).text}</h4>
+                        <p>${question.explanation}</p>
+                    </div>
+                `;
+
+                container.appendChild(questionDiv);
+            });
+        }
+
+        function selectOption(element, questionId, isCorrect) {
+            if (submitted) return;
+
+            // Remove selection from other options in this question
+            const question = document.getElementById(questionId);
+            const options = question.querySelectorAll('.option');
+            options.forEach(opt => opt.classList.remove('selected'));
+
+            // Add selection to clicked option
+            element.classList.add('selected');
+            element.querySelector('input').checked = true;
+
+            // Store the answer
+            selectedAnswers[questionId] = isCorrect;
+        }
+
+        function submitQuiz() {
+            if (Object.keys(selectedAnswers).length < 5) {
+                alert('Please answer all questions before submitting!');
+                return;
+            }
+
+            submitted = true;
+            
+            // Calculate score
+            const correctAnswers = Object.values(selectedAnswers).filter(answer => answer === true).length;
+            const totalQuestions = 5;
+            const percentage = Math.round((correctAnswers / totalQuestions) * 100);
+
+            // Show correct/incorrect styling
+            currentQuestions.forEach(question => {
+                const questionDiv = document.getElementById(`q${question.id}`);
+                const options = questionDiv.querySelectorAll('.option');
+                
+                options.forEach((option, optIndex) => {
+                    const isSelected = option.classList.contains('selected');
+                    const optionText = option.querySelector('label').textContent;
+                    const isCorrect = question.options.some(opt => opt.text === optionText && opt.correct);
+                    
+                    if (isSelected) {
+                        if (selectedAnswers[`q${question.id}`]) {
+                            option.classList.add('correct');
+                        } else {
+                            option.classList.add('incorrect');
+                        }
+                    }
+                    
+                    // Highlight correct answer if wrong answer was selected
+                    if (isCorrect && !isSelected && selectedAnswers[`q${question.id}`] === false) {
+                        option.classList.add('correct');
+                    }
+                });
+            });
+
+            // Display results
+            const resultsDiv = document.getElementById('results');
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const feedbackText = document.getElementById('feedbackText');
+
+            scoreDisplay.textContent = `${correctAnswers}/${totalQuestions} (${percentage}%)`;
+            
+            if (percentage >= 80) {
+                scoreDisplay.className = 'score excellent';
+                feedbackText.textContent = '🎉 Excellent! You understand Status Notifications perfectly!';
+            } else if (percentage >= 60) {
+                scoreDisplay.className = 'score good';
+                feedbackText.textContent = '👍 Good job! You grasp the basics. Review the explanations to master the details.';
+            } else {
+                scoreDisplay.className = 'score needs-improvement';
+                feedbackText.textContent = '📚 Keep studying! Review the Status Notifications guide and try again to improve your understanding.';
+            }
+
+            resultsDiv.style.display = 'block';
+            document.getElementById('submitBtn').disabled = true;
+        }
+
+        function showExplanations() {
+            const explanations = document.querySelectorAll('.explanation');
+            explanations.forEach(exp => exp.classList.add('show'));
+        }
+
+        function resetQuiz() {
+            submitted = false;
+            selectedAnswers = {};
+            
+            // Reset all styling
+            const options = document.querySelectorAll('.option');
+            options.forEach(opt => {
+                opt.classList.remove('selected', 'correct', 'incorrect');
+                opt.querySelector('input').checked = false;
+            });
+
+            // Hide results and explanations
+            document.getElementById('results').style.display = 'none';
+            const explanations = document.querySelectorAll('.explanation');
+            explanations.forEach(exp => exp.classList.remove('show'));
+
+            // Re-enable submit button
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        function generateNewQuiz() {
+            // Reset everything
+            resetQuiz();
+            
+            // Generate new random questions
+            currentQuestions = generateRandomQuestions();
+            
+            // Render new questions
+            renderQuestions();
+        }
+
+        // Initialize quiz on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            currentQuestions = generateRandomQuestions();
+            renderQuestions();
+        });
+    </script>
+</body>
+</html>

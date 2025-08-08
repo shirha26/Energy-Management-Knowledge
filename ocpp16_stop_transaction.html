@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCPP 1.6 Stop Transaction Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="1" fill="rgba(255,255,255,0.1)"/></svg>');
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .controls {
+            padding: 20px 40px;
+            background: rgba(79, 172, 254, 0.1);
+            border-bottom: 1px solid rgba(79, 172, 254, 0.2);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn.quiz {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn.quiz:hover {
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+        }
+
+        .btn.home {
+            background: linear-gradient(135deg, #4ffec9 0%, #00fe4c 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn.home:hover{
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 254, 146, 0.4);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(79, 172, 254, 0.1);
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .section-header:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .section-header .toggle {
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .section-header.collapsed .toggle {
+            transform: rotate(-90deg);
+        }
+
+        .section-content {
+            padding: 30px;
+            display: block;
+        }
+
+        .section-content.collapsed {
+            display: none;
+        }
+
+        .step-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 5px solid #e74c3c;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .step-container h3 {
+            color: #333;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-right: 15px;
+        }
+
+        .copy-btn {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid #e74c3c;
+            color: #e74c3c;
+            padding: 5px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .step-container p {
+            margin-bottom: 12px;
+            color: #555;
+            font-size: 1rem;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, rgba(231, 76, 60, 0.1) 0%, rgba(192, 57, 43, 0.1) 100%);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 3px solid #e74c3c;
+        }
+
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .overview-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(79, 172, 254, 0.2);
+        }
+
+        .overview-card h3 {
+            color: #4facfe;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .process-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .process-step {
+            background: rgba(231, 76, 60, 0.1);
+            border: 2px solid #e74c3c;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+            position: relative;
+        }
+
+        .process-step::after {
+            content: "→";
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #e74c3c;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .process-step:last-child::after {
+            display: none;
+        }
+
+        .process-step h4 {
+            color: #e74c3c;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .process-step p {
+            color: #555;
+            font-size: 0.8rem;
+            margin: 0;
+        }
+
+        .reason-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 5px solid #f39c12;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .reason-container h3 {
+            color: #f39c12;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 5px;
+                border-radius: 15px;
+                max-width: 100%;
+            }
+            
+            .header {
+                padding: 20px 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+                line-height: 1.2;
+                word-wrap: break-word;
+            }
+            
+            .header p {
+                font-size: 1rem;
+                word-wrap: break-word;
+            }
+            
+            .content {
+                padding: 15px;
+            }
+            
+            .controls {
+                padding: 10px;
+                gap: 10px;
+            }
+            
+            .btn {
+                padding: 8px 15px;
+                font-size: 0.8rem;
+                word-wrap: break-word;
+                min-width: auto;
+                white-space: normal;
+            }
+            
+            .section-header h2 {
+                font-size: 1.0rem;
+            }
+
+            .section-content {
+                padding: 15px;
+            }
+            
+            .step-container {
+                padding: 15px;
+            }
+            
+            .step-container h3 {
+                font-size: 1.1rem;
+                line-height: 1.3;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .copy-btn {
+                align-self: flex-end;
+            }
+            
+            .overview-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .overview-card {
+                padding: 20px;
+            }
+            
+            .overview-card h3 {
+                font-size: 1.1rem;
+            }
+            
+            .process-flow {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .process-step::after {
+                content: "↓";
+                right: auto;
+                top: auto;
+                bottom: -20px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            
+            pre {
+                font-size: 0.7rem !important;
+                overflow-x: auto !important;
+                white-space: pre !important;
+                word-wrap: normal !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                margin: 3px;
+                padding: 0;
+            }
+            
+            .header h1 {
+                font-size: 1.6rem;
+            }
+            
+            .content {
+                padding: 10px;
+            }
+            
+            .section-header h2 {
+                font-size: 0.85rem;
+            }
+            
+            .section-content {
+                padding: 10px;
+            }
+            
+            .step-container {
+                padding: 12px;
+            }
+            
+            .btn {
+                font-size: 0.7rem;
+                padding: 6px 12px;
+            }
+            
+            pre {
+                font-size: 0.6rem !important;
+                padding: 10px !important;
+            }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #4facfe;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛑 OCPP 1.6 Stop Transaction Guide</h1>
+            <p>Understanding How EV Charging Sessions End</p>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="expandAll()">📖 Expand All Sections</button>
+            <button class="btn" onclick="collapseAll()">📕 Collapse All Sections</button>
+            <a href="stop_transaction_quiz.html" class="btn quiz">🧠 Test Your Knowledge - Quiz</a>
+            <a href="index.html" class="btn home">🏠 Back to Menu</a>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>🔍 What is Stop Transaction?</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="overview-grid">
+                        <div class="overview-card">
+                            <span class="icon">🛑</span>
+                            <h3>Definition</h3>
+                            <p>Stop Transaction is like "checking out of a hotel" - it's the official message that ends a charging session and provides a complete summary of what happened during the charging period.</p>
+                        </div>
+                        <div class="overview-card">
+                            <span class="icon">📊</span>
+                            <h3>Final Summary</h3>
+                            <p>Contains the final meter reading, total energy consumed, any transaction data collected during the session, and the reason why charging ended.</p>
+                        </div>
+                        <div class="overview-card">
+                            <span class="icon">💰</span>
+                            <h3>Billing Trigger</h3>
+                            <p>This message triggers the final billing calculation. Like getting your restaurant bill - it shows exactly what you consumed and what you owe.</p>
+                        </div>
+                        <div class="overview-card">
+                            <span class="icon">🔄</span>
+                            <h3>Session Closure</h3>
+                            <p>Officially closes the transaction in all systems, releases the connector for the next user, and archives all session data for records.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>🔄 Complete Stop Transaction Process</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="process-flow">
+                        <div class="process-step">
+                            <h4>1. Charging Ends</h4>
+                            <p>Car finishes charging or user stops it</p>
+                        </div>
+                        <div class="process-step">
+                            <h4>2. Cable Disconnected</h4>
+                            <p>User unplugs cable from vehicle</p>
+                        </div>
+                        <div class="process-step">
+                            <h4>3. Final Readings</h4>
+                            <p>System captures final meter values</p>
+                        </div>
+                        <div class="process-step">
+                            <h4>4. Stop Message</h4>
+                            <p>Station sends transaction summary</p>
+                        </div>
+                        <div class="process-step">
+                            <h4>5. Billing & Cleanup</h4>
+                            <p>Final bill calculated, connector released</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step-container">
+                        <h3><span class="step-number">1</span>Charging Completion <button class="copy-btn" onclick="copyText('Charging Completion')">📋 Copy</button></h3>
+                        <p><strong>What happens:</strong> The charging process reaches its natural end point or is deliberately stopped by the user.</p>
+                        <div class="highlight">
+                            <h4 style="color: #e74c3c; margin-bottom: 10px;">🔋 Real-World Example:</h4>
+                            <p>Like your phone reaching 100% battery and stopping charging automatically, or you deciding to unplug it early because you need to leave.</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">Common Ways Charging Ends:</h4>
+                            <p>• <strong>Battery Full:</strong> Vehicle reaches target charge level (most common)</p>
+                            <p>• <strong>User Stops:</strong> User decides to end charging early</p>
+                            <p>• <strong>Time Limit:</strong> Maximum charging time reached</p>
+                            <p>• <strong>Scheduled End:</strong> Pre-programmed stop time arrived</p>
+                            <p>• <strong>Emergency Stop:</strong> Safety system intervention</p>
+                        </div>
+                    </div>
+
+                    <div class="step-container">
+                        <h3><span class="step-number">2</span>Physical Disconnection <button class="copy-btn" onclick="copyText('Physical Disconnection')">📋 Copy</button></h3>
+                        <p><strong>What happens:</strong> The user physically removes the charging cable from their vehicle.</p>
+                        <div class="highlight">
+                            <h4 style="color: #e74c3c; margin-bottom: 10px;">🔌 Real-World Example:</h4>
+                            <p>Like unplugging your laptop charger when you're ready to go. The charging station detects that the connection has been broken and knows the session is ending.</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">System Detections:</h4>
+                            <p>• <strong>Connection Lost:</strong> No more electrical connection to vehicle</p>
+                            <p>• <strong>Safety Check:</strong> Ensures all power has stopped flowing</p>
+                            <p>• <strong>Cable Status:</strong> Confirms cable is properly returned/secured</p>
+                            <p>• <strong>Connector Release:</strong> Unlocks connector from vehicle if needed</p>
+                        </div>
+                    </div>
+
+                    <div class="step-container">
+                        <h3><span class="step-number">3</span>Final Meter Reading <button class="copy-btn" onclick="copyText('Final Meter Reading')">📋 Copy</button></h3>
+                        <p><strong>What happens:</strong> The charging station captures the final energy meter reading and calculates total consumption.</p>
+                        <div class="highlight">
+                            <h4 style="color: #e74c3c; margin-bottom: 10px;">📊 Real-World Example:</h4>
+                            <p>Like a taxi driver checking the final fare on the meter when you reach your destination. The system records exactly how much energy was delivered during the entire trip.</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">Data Captured:</h4>
+                            <p>• <strong>Final kWh Reading:</strong> Total energy delivered to vehicle</p>
+                            <p>• <strong>Session Duration:</strong> Total time from start to stop</p>
+                            <p>• <strong>Peak Power:</strong> Highest power level during session</p>
+                            <p>• <strong>Average Efficiency:</strong> Overall charging performance</p>
+                            <p>• <strong>Any Interruptions:</strong> Pauses or issues during charging</p>
+                        </div>
+                    </div>
+
+                    <div class="step-container">
+                        <h3><span class="step-number">4</span>Stop Transaction Message <button class="copy-btn" onclick="copyText('Stop Transaction Message')">📋 Copy</button></h3>
+                        <p><strong>What happens:</strong> The charging station sends a comprehensive "Stop Transaction" message to the management system with all session details.</p>
+                        <div class="highlight">
+                            <h4 style="color: #e74c3c; margin-bottom: 10px;">📨 Real-World Example:</h4>
+                            <p>Like a hotel sending your final bill to your credit card company - it includes all the details: what room you stayed in, how long, what you consumed, and the total charges.</p>
+                        </div>
+                        
+                        <div style="margin-top: 30px;">
+                            <h3 style="color: #4facfe; margin-bottom: 15px;">📄 Example: Stop Transaction JSON Message</h3>
+                            <pre style="background: rgba(0,0,0,0.05); padding: 20px; border-radius: 8px; overflow-x: auto; font-family: 'Courier New', monospace; line-height: 1.4; border-left: 4px solid #e74c3c;"><code>{
+  "messageType": "StopTransaction",
+  "transactionId": 98765,
+  "idTag": "RFID12345678",
+  "timestamp": "2025-08-07T16:45:00.000Z",
+  "meterStop": 24750,
+  "reason": "EVDisconnected",
+  "transactionData": [
+    {
+      "timestamp": "2025-08-07T16:45:00.000Z",
+      "sampledValue": [
+        {
+          "value": "24.75",
+          "context": "Transaction.End",
+          "measurand": "Energy.Active.Import.Register",
+          "unit": "kWh"
+        }
+      ]
+    }
+  ]
+}</code></pre>
+                            <div style="margin-top: 15px; padding: 15px; background: rgba(231, 76, 60, 0.1); border-radius: 8px;">
+                                <p style="margin: 0; font-size: 0.9rem;"><strong>What this means:</strong> "Transaction #98765 ended at 4:45 PM on August 7th when the user (RFID12345678) disconnected their car. Final meter reading: 24.75 kWh total energy delivered."</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-container">
+                        <h3><span class="step-number">5</span>Billing & System Cleanup <button class="copy-btn" onclick="copyText('Billing & System Cleanup')">📋 Copy</button></h3>
+                        <p><strong>What happens:</strong> The management system processes the final bill, charges the customer, and prepares the charging station for the next user.</p>
+                        <div class="highlight">
+                            <h4 style="color: #e74c3c; margin-bottom: 10px;">💳 Real-World Example:</h4>
+                            <p>Like checking out of a hotel - they charge your credit card, give you a receipt, clean the room, and make it available for the next guest.</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">Final Steps:</h4>
+                            <p>• <strong>Calculate Final Bill:</strong> Energy cost + any time-based fees</p>
+                            <p>• <strong>Process Payment:</strong> Charge customer's payment method</p>
+                            <p>• <strong>Send Receipt:</strong> Email or app notification with session details</p>
+                            <p>• <strong>Update Records:</strong> Store transaction data for reporting</p>
+                            <p>• <strong>Reset Connector:</strong> Make charging port available for next user</p>
+                            <p>• <strong>Status Update:</strong> Change connector status to "Available"</p>
+                        </div>
+                        
+                        <div style="margin-top: 30px;">
+                            <h3 style="color: #4facfe; margin-bottom: 15px;">📄 Example: Stop Transaction Response</h3>
+                            <pre style="background: rgba(0,0,0,0.05); padding: 20px; border-radius: 8px; overflow-x: auto; font-family: 'Courier New', monospace; line-height: 1.4; border-left: 4px solid #27ae60;"><code>{
+  "messageType": "StopTransactionResponse",
+  "idTagInfo": {
+    "status": "Accepted"
+  }
+}</code></pre>
+                            <div style="margin-top: 15px; padding: 15px; background: rgba(39, 174, 96, 0.1); border-radius: 8px;">
+                                <p style="margin: 0; font-size: 0.9rem;"><strong>What this means:</strong> "Management system confirms: 'Transaction successfully ended and processed. Thank you!'"</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>❓ Stop Reasons Explained</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="reason-container">
+                        <h3>🔌 EVDisconnected</h3>
+                        <p><strong>What it means:</strong> The user unplugged the charging cable from their car.</p>
+                        <div class="highlight" style="background: rgba(243, 156, 18, 0.1); border-left-color: #f39c12;">
+                            <p><strong>Real-world:</strong> Most common and normal way charging ends. Like unplugging your phone charger when you're ready to go.</p>
+                        </div>
+                    </div>
+
+                    <div class="reason-container">
+                        <h3>👤 Local</h3>
+                        <p><strong>What it means:</strong> Someone physically pressed the stop button on the charging station.</p>
+                        <div class="highlight" style="background: rgba(243, 156, 18, 0.1); border-left-color: #f39c12;">
+                            <p><strong>Real-world:</strong> User decided to end charging early by pressing the stop button on the charger, similar to pressing "stop" on a gas pump.</p>
+                        </div>
+                    </div>
+
+                    <div class="reason-container">
+                        <h3>📱 Remote</h3>
+                        <p><strong>What it means:</strong> The management system or user remotely commanded the session to stop.</p>
+                        <div class="highlight" style="background: rgba(243, 156, 18, 0.1); border-left-color: #f39c12;">
+                            <p><strong>Real-world:</strong> User used their mobile app to stop charging, or the management system stopped it due to grid demands or maintenance needs.</p>
+                        </div>
+                    </div>
+
+                    <div class="reason-container">
+                        <h3>🔋 PowerLoss</h3>
+                        <p><strong>What it means:</strong> The charging station lost electrical power from the grid.</p>
+                        <div class="highlight" style="background: rgba(231, 76, 60, 0.1); border-left-color: #e74c3c;">
+                            <p><strong>Real-world:</strong> Like a power outage at your house - the charger can't continue because there's no electricity to provide.</p>
+                        </div>
+                    </div>
+
+                    <div class="reason-container">
+                        <h3>⏱️ ReaderTimeout</h3>
+                        <p><strong>What it means:</strong> The card reader or authorization system stopped responding.</p>
+                        <div class="highlight" style="background: rgba(231, 76, 60, 0.1); border-left-color: #e74c3c;">
+                            <p><strong>Real-world:</strong> Like when a credit card reader freezes at a store - the system can't verify the user anymore so it stops for safety.</p>
+                        </div>
+                    </div>
+
+                    <div class="reason-container">
+                        <h3>🚨 EmergencyStop</h3>
+                        <p><strong>What it means:</strong> Someone hit the emergency stop button or a safety system activated.</p>
+                        <div class="highlight" style="background: rgba(231, 76, 60, 0.1); border-left-color: #e74c3c;">
+                            <p><strong>Real-world:</strong> Like pulling the emergency brake - immediate shutdown for safety reasons, such as equipment malfunction or dangerous situation.</p>
+                        </div>
+                    </div>
+
+                    <div class="reason-container">
+                        <h3>🔒 DeAuthorized</h3>
+                        <p><strong>What it means:</strong> The user's authorization was revoked during the charging session.</p>
+                        <div class="highlight" style="background: rgba(231, 76, 60, 0.1); border-left-color: #e74c3c;">
+                            <p><strong>Real-world:</strong> Like having your credit card declined mid-transaction - perhaps the account was suspended or payment method expired during charging.</p>
+                        </div>
+                    </div>
+
+                    <div class="reason-container">
+                        <h3>🔧 Other</h3>
+                        <p><strong>What it means:</strong> The session ended for a reason not covered by the standard categories.</p>
+                        <div class="highlight" style="background: rgba(155, 89, 182, 0.1); border-left-color: #9b59b6;">
+                            <p><strong>Real-world:</strong> Catch-all category for unusual situations - could be software updates, maintenance requirements, or other operational needs.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>💡 What Happens to Transaction Data?</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="step-container" style="border-left-color: #4facfe;">
+                        <h3>📊 Data Archival <button class="copy-btn" onclick="copyText('Data Archival')">📋 Copy</button></h3>
+                        <p>All transaction data is permanently stored for billing, reporting, and compliance purposes.</p>
+                        <div class="highlight" style="background: rgba(79, 172, 254, 0.1); border-left-color: #4facfe;">
+                            <h4 style="color: #4facfe; margin-bottom: 10px;">🗃️ What Gets Saved:</h4>
+                            <p>• Complete energy consumption records<br>• All meter readings during the session<br>• User identification and authorization<br>• Start and stop times with precise timestamps<br>• Any errors or issues that occurred<br>• Payment and billing information</p>
+                        </div>
+                    </div>
+
+                    <div class="step-container" style="border-left-color: #27ae60;">
+                        <h3>💰 Billing Processing <button class="copy-btn" onclick="copyText('Billing Processing')">📋 Copy</button></h3>
+                        <p>The final transaction data triggers the billing system to calculate charges and process payment.</p>
+                        <div class="highlight" style="background: rgba(39, 174, 96, 0.1); border-left-color: #27ae60;">
+                            <h4 style="color: #27ae60; margin-bottom: 10px;">💳 Billing Components:</h4>
+                            <p>• <strong>Energy Charges:</strong> Cost per kWh consumed<br>• <strong>Time Charges:</strong> Connection fees or time-based rates<br>• <strong>Service Fees:</strong> Network access or processing fees<br>• <strong>Tax Calculations:</strong> Local tax rates applied<br>• <strong>Discounts/Credits:</strong> Membership benefits or promotions</p>
+                        </div>
+                    </div>
+
+                    <div class="step-container" style="border-left-color: #9b59b6;">
+                        <h3>📈 Analytics & Reporting <button class="copy-btn" onclick="copyText('Analytics & Reporting')">📋 Copy</button></h3>
+                        <p>Transaction data feeds into analytics systems for operational insights and business intelligence.</p>
+                        <div class="highlight" style="background: rgba(155, 89, 182, 0.1); border-left-color: #9b59b6;">
+                            <h4 style="color: #9b59b6; margin-bottom: 10px;">📊 Analytics Uses:</h4>
+                            <p>• <strong>Usage Patterns:</strong> Peak times and popular locations<br>• <strong>Customer Behavior:</strong> Charging preferences and frequency<br>• <strong>Equipment Performance:</strong> Charger reliability and efficiency<br>• <strong>Revenue Analysis:</strong> Financial performance and trends<br>• <strong>Grid Impact:</strong> Energy demand patterns</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>📚 Summary</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="highlight">
+                        <p><strong>Key Takeaway:</strong> Stop Transaction is like the final checkout process that officially ends a charging session. It captures all the essential data needed for billing, provides a complete record of the session, and ensures the charging station is properly reset for the next user.</p>
+                    </div>
+                    <div class="overview-grid">
+                        <div class="overview-card">
+                            <span class="icon">✅</span>
+                            <h3>What We Learned</h3>
+                            <p>• Stop Transaction formally ends charging sessions<br>• Contains final billing data and session summary<br>• Different stop reasons indicate why charging ended<br>• Triggers billing, archival, and system cleanup</p>
+                        </div>
+                        <div class="overview-card">
+                            <span class="icon">🎯</span>
+                            <h3>Real-World Impact</h3>
+                            <p>• Ensures accurate customer billing<br>• Provides audit trail for transactions<br>• Enables business analytics and insights<br>• Maintains system efficiency and availability</p>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 30px;">
+                        <a href="stop_transaction_quiz.html" class="btn quiz" style="font-size: 1.1rem; padding: 15px 30px;">
+                            🧠 Ready to Test Your Knowledge? Take the Quiz! 
+                        </a>
+                        <a href="index.html" class="btn home" style="font-size: 1.1rem; padding: 15px 30px;">🏠 Back to Menu</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">
+        Copied to clipboard! ✅
+    </div>
+
+    <script>
+        function toggleSection(header) {
+            const content = header.nextElementSibling;
+            const toggle = header.querySelector('.toggle');
+            
+            header.classList.toggle('collapsed');
+            content.classList.toggle('collapsed');
+        }
+
+        function expandAll() {
+            const headers = document.querySelectorAll('.section-header');
+            const contents = document.querySelectorAll('.section-content');
+            
+            headers.forEach(header => header.classList.remove('collapsed'));
+            contents.forEach(content => content.classList.remove('collapsed'));
+        }
+
+        function collapseAll() {
+            const headers = document.querySelectorAll('.section-header');
+            const contents = document.querySelectorAll('.section-content');
+            
+            headers.forEach(header => header.classList.add('collapsed'));
+            contents.forEach(content => content.classList.add('collapsed'));
+        }
+
+        function copyText(stepName) {
+            const section = event.target.closest('.section');
+            const sectionTitle = section.querySelector('.section-header h2').textContent;
+            const copyText = `${sectionTitle} - ${stepName}`;
+            
+            navigator.clipboard.writeText(copyText).then(() => {
+                showToast();
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = copyText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast();
+            });
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Initialize with all sections collapsed
+        document.addEventListener('DOMContentLoaded', () => {
+            collapseAll();
+        });
+    </script>
+</body>
+</html>

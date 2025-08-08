@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCPP 1.6 Stop Transaction Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .quiz-info {
+            background: rgba(79, 172, 254, 0.1);
+            padding: 20px 40px;
+            text-align: center;
+            border-bottom: 1px solid rgba(79, 172, 254, 0.2);
+        }
+
+        .quiz-info p {
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .quiz-content {
+            padding: 40px;
+        }
+
+        .question {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #e74c3c;
+        }
+
+        .question h3 {
+            color: #333;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .question-number {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            background: rgba(79, 172, 254, 0.05);
+            border: 2px solid rgba(79, 172, 254, 0.2);
+            border-radius: 10px;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .option:hover {
+            background: rgba(79, 172, 254, 0.1);
+            border-color: #4facfe;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            background: rgba(79, 172, 254, 0.2);
+            border-color: #4facfe;
+            color: #333;
+        }
+
+        .option.correct {
+            background: rgba(46, 204, 113, 0.2);
+            border-color: #2ecc71;
+            color: #27ae60;
+        }
+
+        .option.incorrect {
+            background: rgba(231, 76, 60, 0.2);
+            border-color: #e74c3c;
+            color: #c0392b;
+        }
+
+        .option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #4facfe;
+        }
+
+        .option label {
+            cursor: pointer;
+            flex: 1;
+            font-size: 1rem;
+        }
+
+        .controls {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn.home {
+            background: linear-gradient(135deg, #4ffec9 0%, #00fe4c 100%);
+            color: white;
+        }
+
+        .btn.home:hover{
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 254, 146, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+        }
+
+        .btn.back {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn.back:hover {
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+        }
+
+        .results {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            display: none;
+        }
+
+        .score {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .score.excellent {
+            color: #27ae60;
+        }
+
+        .score.good {
+            color: #f39c12;
+        }
+
+        .score.needs-improvement {
+            color: #e74c3c;
+        }
+
+        .feedback {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .explanation {
+            background: rgba(79, 172, 254, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+            text-align: left;
+            display: none;
+        }
+
+        .explanation h4 {
+            color: #4facfe;
+            margin-bottom: 10px;
+        }
+
+        .explanation.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 8px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 25px 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .header p {
+                font-size: 1rem;
+            }
+
+            .quiz-content {
+                padding: 15px;
+            }
+
+            .question h3 { 
+                font-size: 1.1rem;
+                line-height: 1.3;
+            }
+            
+            .question {
+                padding: 18px;
+            }
+            
+            .controls {
+                padding: 12px;
+                gap: 8px;
+            }
+            
+            .btn {
+                padding: 8px 16px;
+                font-size: 0.85rem;
+                margin: 2px;
+                min-width: 100px;
+            }
+
+            .option label {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .header p {
+                font-size: 0.9rem;
+            }
+            
+            .quiz-content {
+                padding: 12px;
+            }
+            
+            .question {
+                padding: 15px;
+            }
+            
+            .question h3 {
+                font-size: 1rem;
+                line-height: 1.2;
+            }
+            
+            .btn {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+                min-width: 90px;
+            }
+            
+            .option {
+                padding: 12px 15px;
+            }
+            
+            .option label {
+                font-size: 0.85rem;
+                line-height: 1.3;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            
+            .quiz-content {
+                padding: 10px;
+            }
+            
+            .question {
+                padding: 12px;
+            }
+            
+            .question h3 {
+                font-size: 0.9rem;
+            }
+            
+            .btn {
+                font-size: 0.75rem;
+                padding: 5px 10px;
+                min-width: 80px;
+            }
+            
+            .option label {
+                font-size: 0.8rem;
+            }
+            
+            .option {
+                padding: 10px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛑 Stop Transaction Quiz</h1>
+            <p>Test your understanding of Charging Session Completion</p>
+        </div>
+
+        <div class="quiz-info">
+            <p>⚡ <strong>Randomized Quiz:</strong> 5 questions selected from a bank of 25 questions | Each attempt will have different questions</p>
+            <div style="margin-top: 15px;">
+                <a href="ocpp16_stop_transaction.html" class="btn back">
+                    📖 Back to Stop Transaction Guide
+                </a>
+                <a href="index.html" class="btn home">🏠 Back to Menu</a>
+            </div>
+        </div>
+
+        <div class="quiz-content">
+            <div id="questionsContainer">
+                <!-- Questions will be dynamically inserted here -->
+            </div>
+
+            <div class="controls">
+                <button class="btn" onclick="submitQuiz()" id="submitBtn">📝 Submit Quiz</button>
+                <button class="btn secondary" onclick="generateNewQuiz()" id="newQuizBtn">🎲 New Random Quiz</button>
+                <button class="btn secondary" onclick="resetQuiz()" id="resetBtn">🔄 Reset Current Quiz</button>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="ocpp16_stop_transaction.html" class="btn back">📖 Back to Guide</a>
+                <a href="index.html" class="btn home">🏠 Back to Menu</a>
+            </div>
+
+            <div class="results" id="results">
+                <div class="score" id="scoreDisplay"></div>
+                <div class="feedback" id="feedbackText"></div>
+                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 20px;">
+                    <button class="btn" onclick="showExplanations()">💡 View Explanations</button>
+                    <a href="ocpp16_stop_transaction.html" class="btn back">📖 Review Study Guide</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Bank of 25 questions about Stop Transaction Events
+        const questionBank = [
+            {
+                id: 1,
+                question: "What is the best analogy to understand Stop Transaction events?",
+                options: [
+                    { text: "Like turning off your car's engine when you reach your destination", correct: false },
+                    { text: "Like checking out of a hotel - final bill, return keys, prepare room for next guest", correct: true },
+                    { text: "Like buying groceries at the supermarket", correct: false },
+                    { text: "Like making a phone call to a friend", correct: false }
+                ],
+                explanation: "Stop Transaction is like hotel checkout - it includes final billing, completing all paperwork, and preparing the service for the next customer."
+            },
+            {
+                id: 2,
+                question: "What does 'reason: EVDisconnected' mean in a Stop Transaction message?",
+                options: [
+                    { text: "The electric vehicle broke down", correct: false },
+                    { text: "The user unplugged the charging cable from their car (most common)", correct: true },
+                    { text: "The charging station lost power", correct: false },
+                    { text: "There was a software error", correct: false }
+                ],
+                explanation: "EVDisconnected is the most common stop reason - it means the user physically unplugged the cable from their vehicle, which is the normal way to end charging."
+            },
+            {
+                id: 3,
+                question: "In the Stop Transaction JSON example, what does 'meterStop: 24750' represent?",
+                options: [
+                    { text: "The cost of the charging session in cents", correct: false },
+                    { text: "The final meter reading showing total energy delivered", correct: true },
+                    { text: "The charging session ID number", correct: false },
+                    { text: "The duration of charging in seconds", correct: false }
+                ],
+                explanation: "MeterStop shows the final energy meter reading - like the final odometer reading at the end of a taxi ride, showing total energy consumed."
+            },
+            {
+                id: 4,
+                question: "What's the difference between 'PowerLoss' and 'EmergencyStop' as stop reasons?",
+                options: [
+                    { text: "PowerLoss is when electricity supply fails, EmergencyStop is immediate safety shutdown", correct: true },
+                    { text: "They mean exactly the same thing", correct: false },
+                    { text: "PowerLoss is planned, EmergencyStop is unplanned", correct: false },
+                    { text: "PowerLoss only happens at night, EmergencyStop only during day", correct: false }
+                ],
+                explanation: "PowerLoss means external power supply failed (like a blackout), while EmergencyStop means someone pressed the emergency button or safety system activated immediately."
+            },
+            {
+                id: 5,
+                question: "What happens during the 'Final Meter Reading' step of stopping a transaction?",
+                options: [
+                    { text: "The system just records when charging ended", correct: false },
+                    { text: "All session data is deleted for privacy", correct: false },
+                    { text: "System captures total energy delivered and calculates session statistics", correct: true },
+                    { text: "The charging station shuts down completely", correct: false }
+                ],
+                explanation: "Final meter reading captures complete session data: total energy, session duration, peak power levels, and any issues - like a complete trip summary."
+            },
+            {
+                id: 6,
+                question: "Why might you see 'reason: Remote' in a Stop Transaction?",
+                options: [
+                    { text: "The charging station is in a remote location", correct: false },
+                    { text: "The management system or user remotely commanded the session to stop", correct: true },
+                    { text: "The stop reason is unknown", correct: false },
+                    { text: "The car is being charged remotely without cables", correct: false }
+                ],
+                explanation: "Remote means someone used a mobile app, web portal, or the management system sent a command to stop charging - like remotely ending a streaming session."
+            },
+            {
+                id: 7,
+                question: "What is the purpose of 'transactionData' in Stop Transaction messages?",
+                options: [
+                    { text: "It contains the user's personal information", correct: false },
+                    { text: "It provides historical meter readings and session details for billing", correct: true },
+                    { text: "It stores the charging station's maintenance schedule", correct: false },
+                    { text: "It includes weather conditions during charging", correct: false }
+                ],
+                explanation: "TransactionData contains all the meter readings and measurements collected during the session - like a detailed receipt showing exactly what was consumed."
+            },
+            {
+                id: 8,
+                question: "When does billing typically get processed in relation to Stop Transaction?",
+                options: [
+                    { text: "Billing happens only at the end of each month", correct: false },
+                    { text: "Stop Transaction triggers the final billing calculation and payment processing", correct: true },
+                    { text: "Billing is processed before charging even starts", correct: false },
+                    { text: "Billing only happens if the user manually requests it", correct: false }
+                ],
+                explanation: "Stop Transaction provides all the final data needed for billing - total energy, session time, applicable rates - triggering immediate payment processing like a restaurant bill."
+            },
+            {
+                id: 9,
+                question: "What does 'Local' mean as a stop reason?",
+                options: [
+                    { text: "The charging session was for local residents only", correct: false },
+                    { text: "Someone physically pressed the stop button on the charging station", correct: true },
+                    { text: "The session ended because of local weather conditions", correct: false },
+                    { text: "Only local credit cards were accepted", correct: false }
+                ],
+                explanation: "Local means someone used the physical stop button on the charging station itself - like pressing the stop button on a gas pump instead of waiting for it to auto-stop."
+            },
+            {
+                id: 10,
+                question: "What security and audit purposes does Stop Transaction serve?",
+                options: [
+                    { text: "It only provides basic energy consumption numbers", correct: false },
+                    { text: "It creates a complete legal record of the transaction with timestamps and energy measurements", correct: true },
+                    { text: "It just tells other users the charger is now available", correct: false },
+                    { text: "Security isn't important for charging transactions", correct: false }
+                ],
+                explanation: "Stop Transaction creates a complete audit trail - who charged, when, how much energy, how it ended - essential for dispute resolution and regulatory compliance."
+            },
+            {
+                id: 11,
+                question: "How does Stop Transaction handle sessions that end abnormally?",
+                options: [
+                    { text: "Abnormal sessions are ignored and not billed", correct: false },
+                    { text: "The system still captures available data and includes error codes in the stop reason", correct: true },
+                    { text: "All abnormal sessions are charged the maximum possible amount", correct: false },
+                    { text: "Abnormal sessions automatically restart", correct: false }
+                ],
+                explanation: "Even when sessions end unexpectedly, Stop Transaction captures whatever data is available and clearly indicates the reason - like an interrupted phone call still showing duration."
+            },
+            {
+                id: 12,
+                question: "What does 'DeAuthorized' mean as a stop reason?",
+                options: [
+                    { text: "The user's authorization was revoked during the charging session", correct: true },
+                    { text: "The user forgot their password", correct: false },
+                    { text: "The charging station ran out of electricity", correct: false },
+                    { text: "The user's car battery was full", correct: false }
+                ],
+                explanation: "DeAuthorized means the user's permission to charge was removed while charging was active - like having your credit card cancelled while dining at a restaurant."
+            },
+            {
+                id: 13,
+                question: "What happens to the charging connector after Stop Transaction is processed?",
+                options: [
+                    { text: "It remains locked until a technician arrives", correct: false },
+                    { text: "It becomes available for the next user after system cleanup", correct: true },
+                    { text: "It's automatically cleaned by the station", correct: false },
+                    { text: "It shuts down for the rest of the day", correct: false }
+                ],
+                explanation: "After processing Stop Transaction, the connector is reset and made available for the next user - like preparing a hotel room for the next guest after checkout."
+            },
+            {
+                id: 14,
+                question: "Why is the timestamp critical in Stop Transaction messages?",
+                options: [
+                    { text: "It helps predict future charging patterns", correct: false },
+                    { text: "It establishes the official session end time for billing and legal purposes", correct: true },
+                    { text: "It's only used for technical debugging", correct: false },
+                    { text: "It determines the charging speed that was used", correct: false }
+                ],
+                explanation: "The timestamp officially records when charging ended - essential for accurate billing, dispute resolution, and regulatory compliance, like a legal document's date."
+            },
+            {
+                id: 15,
+                question: "What does 'ReaderTimeout' indicate as a stop reason?",
+                options: [
+                    { text: "The user took too long to read the instructions", correct: false },
+                    { text: "The card reader or authorization system stopped responding", correct: true },
+                    { text: "The charging session lasted longer than expected", correct: false },
+                    { text: "The user's reading glasses were needed", correct: false }
+                ],
+                explanation: "ReaderTimeout means the RFID reader or payment system became unresponsive - like a credit card reader freezing, so the session was stopped for security."
+            },
+            {
+                id: 16,
+                question: "How does Stop Transaction affect other users waiting to charge?",
+                options: [
+                    { text: "It has no effect on other users", correct: false },
+                    { text: "It makes the connector available and notifies waiting users", correct: true },
+                    { text: "It reserves the connector for the same user for 24 hours", correct: false },
+                    { text: "It disables all other connectors at the station", correct: false }
+                ],
+                explanation: "Stop Transaction completes the session and releases the connector, allowing queued users to charge - like finishing at an ATM so the next person can use it."
+            },
+            {
+                id: 17,
+                question: "What information does the 'idTag' field contain in Stop Transaction?",
+                options: [
+                    { text: "A random security code generated by the system", correct: false },
+                    { text: "The identification of the user who started the session", correct: true },
+                    { text: "The charging station's serial number", correct: false },
+                    { text: "The car's license plate number", correct: false }
+                ],
+                explanation: "IdTag identifies who started the charging session - the same RFID card, app account, or payment method used at the beginning, providing accountability."
+            },
+            {
+                id: 18,
+                question: "Can a Stop Transaction message be sent without a corresponding Start Transaction?",
+                options: [
+                    { text: "Yes, this happens regularly during maintenance", correct: false },
+                    { text: "No, every Stop Transaction must reference a valid Start Transaction ID", correct: true },
+                    { text: "Only during emergency situations", correct: false },
+                    { text: "Yes, but only for free charging sessions", correct: false }
+                ],
+                explanation: "Stop Transaction must always reference the transactionId from Start Transaction - like needing a boarding pass number to record that you got off a flight."
+            },
+            {
+                id: 19,
+                question: "What does 'Other' mean as a stop reason?",
+                options: [
+                    { text: "The session ended for a reason not covered by standard categories", correct: true },
+                    { text: "Another user took over the charging session", correct: false },
+                    { text: "Multiple stop reasons occurred simultaneously", correct: false },
+                    { text: "The reason is being kept secret for privacy", correct: false }
+                ],
+                explanation: "'Other' is a catch-all for unusual situations not covered by standard stop reasons - like 'other' on a medical form for uncommon conditions."
+            },
+            {
+                id: 20,
+                question: "How does Stop Transaction handle partial charging sessions?",
+                options: [
+                    { text: "Partial sessions are not billed at all", correct: false },
+                    { text: "It records actual energy delivered regardless of whether charging completed fully", correct: true },
+                    { text: "All partial sessions are charged as if they were complete", correct: false },
+                    { text: "Partial sessions are automatically restarted", correct: false }
+                ],
+                explanation: "Stop Transaction accurately records whatever energy was actually delivered - you pay for what you got, like paying for a partial tank of gas if you stop pumping early."
+            },
+            {
+                id: 21,
+                question: "What role does analytics play in Stop Transaction data?",
+                options: [
+                    { text: "Analytics are only used for marketing purposes", correct: false },
+                    { text: "Stop Transaction data feeds business intelligence and operational insights", correct: true },
+                    { text: "Analytics are not used with charging station data", correct: false },
+                    { text: "Only government agencies can analyze the data", correct: false }
+                ],
+                explanation: "Stop Transaction data provides insights into usage patterns, customer behavior, equipment performance, and revenue trends - essential for business operations."
+            },
+            {
+                id: 22,
+                question: "What happens if the network connection fails right when Stop Transaction should be sent?",
+                options: [
+                    { text: "The session data is permanently lost", correct: false },
+                    { text: "The charging station stores the data locally and sends it when connection is restored", correct: true },
+                    { text: "The user is not charged for the session", correct: false },
+                    { text: "The connector becomes permanently unavailable", correct: false }
+                ],
+                explanation: "Modern charging stations buffer important data locally and retry sending Stop Transaction when network connectivity returns - like saving a draft email when internet is down."
+            },
+            {
+                id: 23,
+                question: "How does Stop Transaction ensure data accuracy for billing?",
+                options: [
+                    { text: "It uses estimates based on charging time", correct: false },
+                    { text: "It includes multiple meter readings and checksums to verify accuracy", correct: true },
+                    { text: "It relies on the car's internal battery meter", correct: false },
+                    { text: "Accuracy isn't important for charging transactions", correct: false }
+                ],
+                explanation: "Stop Transaction includes detailed meter readings throughout the session plus final readings to ensure billing accuracy - like a gas pump showing both gallons and total cost for verification."
+            },
+            {
+                id: 24,
+                question: "What does 'WeakSignal' indicate when it causes a transaction to stop?",
+                options: [
+                    { text: "The charging power was too low", correct: false },
+                    { text: "Poor communication between charger and management system", correct: true },
+                    { text: "The user's credit card signal was weak", correct: false },
+                    { text: "The car's battery signal was weak", correct: false }
+                ],
+                explanation: "WeakSignal means the charging station couldn't maintain reliable communication with the management system - like losing cell phone reception during an important call."
+            },
+            {
+                id: 25,
+                question: "After Stop Transaction, what determines how quickly the connector becomes available for the next user?",
+                options: [
+                    { text: "System processing time for final calculations and connector reset", correct: true },
+                    { text: "The connector is immediately available with no delay", correct: false },
+                    { text: "There's always a mandatory 10-minute waiting period", correct: false },
+                    { text: "The next user must call customer service first", correct: false }
+                ],
+                explanation: "The connector becomes available after completing billing calculations, updating status, and resetting systems - usually takes seconds to minutes, like processing a credit card transaction."
+            }
+        ];
+
+        let currentQuestions = [];
+        let selectedAnswers = {};
+        let submitted = false;
+
+        function generateRandomQuestions() {
+            // Shuffle the question bank and take first 5
+            const shuffled = [...questionBank].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, 5);
+        }
+
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+
+            currentQuestions.forEach((question, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question';
+                questionDiv.id = `q${question.id}`;
+
+                // Shuffle the options to randomize answer positions
+                const shuffledOptions = [...question.options];
+                for (let i = shuffledOptions.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
+                }
+
+                const optionsHtml = shuffledOptions.map((option, optIndex) => `
+                    <div class="option" onclick="selectOption(this, 'q${question.id}', ${option.correct})">
+                        <input type="radio" name="q${question.id}" value="${optIndex}" id="q${question.id}${String.fromCharCode(97 + optIndex)}">
+                        <label for="q${question.id}${String.fromCharCode(97 + optIndex)}">${option.text}</label>
+                    </div>
+                `).join('');
+
+                questionDiv.innerHTML = `
+                    <h3>
+                        <span class="question-number">${index + 1}</span>
+                        ${question.question}
+                    </h3>
+                    <div class="options">
+                        ${optionsHtml}
+                    </div>
+                    <div class="explanation">
+                        <h4>✅ Correct Answer: ${question.options.find(opt => opt.correct).text}</h4>
+                        <p>${question.explanation}</p>
+                    </div>
+                `;
+
+                container.appendChild(questionDiv);
+            });
+        }
+
+        function selectOption(element, questionId, isCorrect) {
+            if (submitted) return;
+
+            // Remove selection from other options in this question
+            const question = document.getElementById(questionId);
+            const options = question.querySelectorAll('.option');
+            options.forEach(opt => opt.classList.remove('selected'));
+
+            // Add selection to clicked option
+            element.classList.add('selected');
+            element.querySelector('input').checked = true;
+
+            // Store the answer
+            selectedAnswers[questionId] = isCorrect;
+        }
+
+        function submitQuiz() {
+            if (Object.keys(selectedAnswers).length < 5) {
+                alert('Please answer all questions before submitting!');
+                return;
+            }
+
+            submitted = true;
+            
+            // Calculate score
+            const correctAnswers = Object.values(selectedAnswers).filter(answer => answer === true).length;
+            const totalQuestions = 5;
+            const percentage = Math.round((correctAnswers / totalQuestions) * 100);
+
+            // Show correct/incorrect styling
+            currentQuestions.forEach(question => {
+                const questionDiv = document.getElementById(`q${question.id}`);
+                const options = questionDiv.querySelectorAll('.option');
+                
+                options.forEach((option, optIndex) => {
+                    const isSelected = option.classList.contains('selected');
+                    const optionText = option.querySelector('label').textContent;
+                    const isCorrect = question.options.some(opt => opt.text === optionText && opt.correct);
+                    
+                    if (isSelected) {
+                        if (selectedAnswers[`q${question.id}`]) {
+                            option.classList.add('correct');
+                        } else {
+                            option.classList.add('incorrect');
+                        }
+                    }
+                    
+                    // Highlight correct answer if wrong answer was selected
+                    if (isCorrect && !isSelected && selectedAnswers[`q${question.id}`] === false) {
+                        option.classList.add('correct');
+                    }
+                });
+            });
+
+            // Display results
+            const resultsDiv = document.getElementById('results');
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const feedbackText = document.getElementById('feedbackText');
+
+            scoreDisplay.textContent = `${correctAnswers}/${totalQuestions} (${percentage}%)`;
+            
+            if (percentage >= 80) {
+                scoreDisplay.className = 'score excellent';
+                feedbackText.textContent = '🎉 Excellent! You understand Stop Transaction perfectly!';
+            } else if (percentage >= 60) {
+                scoreDisplay.className = 'score good';
+                feedbackText.textContent = '👍 Good job! You grasp the basics. Review the explanations to master the details.';
+            } else {
+                scoreDisplay.className = 'score needs-improvement';
+                feedbackText.textContent = '📚 Keep studying! Review the Stop Transaction guide and try again to improve your understanding.';
+            }
+
+            resultsDiv.style.display = 'block';
+            document.getElementById('submitBtn').disabled = true;
+        }
+
+        function showExplanations() {
+            const explanations = document.querySelectorAll('.explanation');
+            explanations.forEach(exp => exp.classList.add('show'));
+        }
+
+        function resetQuiz() {
+            submitted = false;
+            selectedAnswers = {};
+            
+            // Reset all styling
+            const options = document.querySelectorAll('.option');
+            options.forEach(opt => {
+                opt.classList.remove('selected', 'correct', 'incorrect');
+                opt.querySelector('input').checked = false;
+            });
+
+            // Hide results and explanations
+            document.getElementById('results').style.display = 'none';
+            const explanations = document.querySelectorAll('.explanation');
+            explanations.forEach(exp => exp.classList.remove('show'));
+
+            // Re-enable submit button
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        function generateNewQuiz() {
+            // Reset everything
+            resetQuiz();
+            
+            // Generate new random questions
+            currentQuestions = generateRandomQuestions();
+            
+            // Render new questions
+            renderQuestions();
+        }
+
+        // Initialize quiz on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            currentQuestions = generateRandomQuestions();
+            renderQuestions();
+        });
+    </script>
+</body>
+</html>

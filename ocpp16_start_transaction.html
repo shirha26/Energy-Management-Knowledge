@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCPP 1.6 Start Transaction Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="1" fill="rgba(255,255,255,0.1)"/></svg>');
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .controls {
+            padding: 20px 40px;
+            background: rgba(79, 172, 254, 0.1);
+            border-bottom: 1px solid rgba(79, 172, 254, 0.2);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn.quiz {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn.quiz:hover {
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+        }
+
+        .btn.home {
+            background: linear-gradient(135deg, #4ffec9 0%, #00fe4c 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn.home:hover{
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 254, 146, 0.4);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(79, 172, 254, 0.1);
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .section-header:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .section-header .toggle {
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .section-header.collapsed .toggle {
+            transform: rotate(-90deg);
+        }
+
+        .section-content {
+            padding: 30px;
+            display: block;
+        }
+
+        .section-content.collapsed {
+            display: none;
+        }
+
+        .step-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 5px solid #4facfe;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .step-container h3 {
+            color: #333;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-right: 15px;
+        }
+
+        .copy-btn {
+            background: rgba(79, 172, 254, 0.1);
+            border: 1px solid #4facfe;
+            color: #4facfe;
+            padding: 5px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #4facfe;
+            color: white;
+        }
+
+        .step-container p {
+            margin-bottom: 12px;
+            color: #555;
+            font-size: 1rem;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, rgba(79, 172, 254, 0.1) 0%, rgba(0, 242, 254, 0.1) 100%);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 3px solid #4facfe;
+        }
+
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .overview-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(79, 172, 254, 0.2);
+        }
+
+        .overview-card h3 {
+            color: #4facfe;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .process-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .process-step {
+            background: rgba(79, 172, 254, 0.1);
+            border: 2px solid #4facfe;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+            position: relative;
+        }
+
+        .process-step::after {
+            content: "→";
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #4facfe;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .process-step:last-child::after {
+            display: none;
+        }
+
+        .process-step h4 {
+            color: #4facfe;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .process-step p {
+            color: #555;
+            font-size: 0.8rem;
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 5px;
+                border-radius: 15px;
+                max-width: 100%;
+            }
+            
+            .header {
+                padding: 20px 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+                line-height: 1.2;
+                word-wrap: break-word;
+            }
+            
+            .header p {
+                font-size: 1rem;
+                word-wrap: break-word;
+            }
+            
+            .content {
+                padding: 15px;
+            }
+            
+            .controls {
+                padding: 10px;
+                gap: 10px;
+            }
+            
+            .btn {
+                padding: 8px 15px;
+                font-size: 0.8rem;
+                word-wrap: break-word;
+                min-width: auto;
+                white-space: normal;
+            }
+            
+            .section-header h2 {
+                font-size: 1.0rem;
+            }
+
+            .section-content {
+                padding: 15px;
+            }
+            
+            .step-container {
+                padding: 15px;
+            }
+            
+            .step-container h3 {
+                font-size: 1.1rem;
+                line-height: 1.3;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .copy-btn {
+                align-self: flex-end;
+            }
+            
+            .overview-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .overview-card {
+                padding: 20px;
+            }
+            
+            .overview-card h3 {
+                font-size: 1.1rem;
+            }
+            
+            .process-flow {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .process-step::after {
+                content: "↓";
+                right: auto;
+                top: auto;
+                bottom: -20px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            
+            pre {
+                font-size: 0.7rem !important;
+                overflow-x: auto !important;
+                white-space: pre !important;
+                word-wrap: normal !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                margin: 3px;
+                padding: 0;
+            }
+            
+            .header h1 {
+                font-size: 1.6rem;
+            }
+            
+            .content {
+                padding: 10px;
+            }
+            
+            .section-header h2 {
+                font-size: 0.85rem;
+            }
+            
+            .section-content {
+                padding: 10px;
+            }
+            
+            .step-container {
+                padding: 12px;
+            }
+            
+            .btn {
+                font-size: 0.7rem;
+                padding: 6px 12px;
+            }
+            
+            pre {
+                font-size: 0.6rem !important;
+                padding: 10px !important;
+            }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #4facfe;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 OCPP 1.6 Start Transaction Guide</h1>
+            <p>Understanding How EV Charging Sessions Begin</p>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="expandAll()">📖 Expand All Sections</button>
+            <button class="btn" onclick="collapseAll()">📕 Collapse All Sections</button>
+            <a href="start_transaction_quiz.html" class="btn quiz">🧠 Test Your Knowledge - Quiz</a>
+            <a href="index.html" class="btn home">🏠 Back to Menu</a>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>🔍 What is Start Transaction?</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="overview-grid">
+                        <div class="overview-card">
+                            <span class="icon">🚀</span>
+                            <h3>Definition</h3>
+                            <p>Start Transaction is like the "key turning in the ignition" of EV charging. It's the official message sent from a charging station to the management system saying "a charging session has officially begun!"</p>
+                        </div>
+                        <div class="overview-card">
+                            <span class="icon">🔐</span>
+                            <h3>Authorization Required</h3>
+                            <p>Before starting, the user must be authorized - like showing your membership card at a gym. This can be done with RFID cards, mobile apps, credit cards, or other identification methods.</p>
+                        </div>
+                        <div class="overview-card">
+                            <span class="icon">⚡</span>
+                            <h3>What Triggers It</h3>
+                            <p>• User swipes RFID card or uses mobile app<br>• Car is properly plugged into the charging connector<br>• Authorization is successful<br>• Charging station is ready and available</p>
+                        </div>
+                        <div class="overview-card">
+                            <span class="icon">📋</span>
+                            <h3>What It Contains</h3>
+                            <p>• Unique transaction ID<br>• Which connector is being used<br>• User identification<br>• Starting meter reading<br>• Timestamp of session start</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>🔄 Complete Start Transaction Process</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="process-flow">
+                        <div class="process-step">
+                            <h4>1. User Arrives</h4>
+                            <p>User approaches charging station with EV</p>
+                        </div>
+                        <div class="process-step">
+                            <h4>2. Authorization</h4>
+                            <p>Swipes card, uses app, or enters payment</p>
+                        </div>
+                        <div class="process-step">
+                            <h4>3. Car Connection</h4>
+                            <p>Plugs charging cable into vehicle</p>
+                        </div>
+                        <div class="process-step">
+                            <h4>4. System Check</h4>
+                            <p>Station verifies everything is ready</p>
+                        </div>
+                        <div class="process-step">
+                            <h4>5. Transaction Starts</h4>
+                            <p>Official charging session begins</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step-container">
+                        <h3><span class="step-number">1</span>User Authorization <button class="copy-btn" onclick="copyText('User Authorization')">📋 Copy</button></h3>
+                        <p><strong>What happens:</strong> The user identifies themselves to the charging station using their preferred method.</p>
+                        <div class="highlight">
+                            <h4 style="color: #4facfe; margin-bottom: 10px;">🔑 Real-World Example:</h4>
+                            <p>Just like using your keycard to enter your office building, or tapping your credit card to buy coffee. The charging station needs to know who you are before it will provide electricity.</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">Common Authorization Methods:</h4>
+                            <p>• <strong>RFID Cards:</strong> Tap a physical card (most common)</p>
+                            <p>• <strong>Mobile Apps:</strong> Use smartphone app to start charging</p>
+                            <p>• <strong>Credit Cards:</strong> Tap or insert payment card</p>
+                            <p>• <strong>QR Codes:</strong> Scan code with phone camera</p>
+                            <p>• <strong>PIN Entry:</strong> Enter access code on keypad</p>
+                        </div>
+                    </div>
+
+                    <div class="step-container">
+                        <h3><span class="step-number">2</span>Physical Connection <button class="copy-btn" onclick="copyText('Physical Connection')">📋 Copy</button></h3>
+                        <p><strong>What happens:</strong> The user connects the charging cable from the station to their electric vehicle.</p>
+                        <div class="highlight">
+                            <h4 style="color: #4facfe; margin-bottom: 10px;">🔌 Real-World Example:</h4>
+                            <p>Like plugging your phone charger into your phone, but much bigger! The charging station detects when the cable is properly connected and the car is ready to receive power.</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">Safety Checks Performed:</h4>
+                            <p>• <strong>Proper Connection:</strong> Cable is securely attached</p>
+                            <p>• <strong>Vehicle Ready:</strong> Car confirms it can accept charge</p>
+                            <p>• <strong>Safety Systems:</strong> Ground fault and overcurrent protection active</p>
+                            <p>• <strong>Communication:</strong> Car and charger can "talk" to each other</p>
+                        </div>
+                    </div>
+
+                    <div class="step-container">
+                        <h3><span class="step-number">3</span>System Verification <button class="copy-btn" onclick="copyText('System Verification')">📋 Copy</button></h3>
+                        <p><strong>What happens:</strong> The charging station performs final checks to ensure everything is ready for safe charging.</p>
+                        <div class="highlight">
+                            <h4 style="color: #4facfe; margin-bottom: 10px;">🔍 Real-World Example:</h4>
+                            <p>Like a pilot's pre-flight checklist - the charging station verifies all systems are go before starting to deliver power. This prevents problems and ensures safety.</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">Verification Checklist:</h4>
+                            <p>• <strong>Connector Status:</strong> Available and functioning</p>
+                            <p>• <strong>User Authorization:</strong> Valid and confirmed</p>
+                            <p>• <strong>Vehicle Communication:</strong> Car is responding</p>
+                            <p>• <strong>Electrical Safety:</strong> All safety systems operational</p>
+                            <p>• <strong>Payment Method:</strong> Valid and can be charged</p>
+                        </div>
+                    </div>
+
+                    <div class="step-container">
+                        <h3><span class="step-number">4</span>Start Transaction Message <button class="copy-btn" onclick="copyText('Start Transaction Message')">📋 Copy</button></h3>
+                        <p><strong>What happens:</strong> The charging station sends an official "Start Transaction" message to the management system.</p>
+                        <div class="highlight">
+                            <h4 style="color: #4facfe; margin-bottom: 10px;">📨 Real-World Example:</h4>
+                            <p>Like checking into a hotel - the front desk (charging station) calls the manager (management system) to say "Guest John Smith has officially checked into room 204 and his stay has begun."</p>
+                        </div>
+                        
+                        <div style="margin-top: 30px;">
+                            <h3 style="color: #4facfe; margin-bottom: 15px;">📄 Example: Start Transaction JSON Message</h3>
+                            <pre style="background: rgba(0,0,0,0.05); padding: 20px; border-radius: 8px; overflow-x: auto; font-family: 'Courier New', monospace; line-height: 1.4; border-left: 4px solid #4facfe;"><code>{
+  "messageType": "StartTransaction",
+  "connectorId": 1,
+  "idTag": "RFID12345678",
+  "meterStart": 0,
+  "reservationId": null,
+  "timestamp": "2025-08-07T14:30:00.000Z"
+}</code></pre>
+                            <div style="margin-top: 15px; padding: 15px; background: rgba(79, 172, 254, 0.1); border-radius: 8px;">
+                                <p style="margin: 0; font-size: 0.9rem;"><strong>What this means:</strong> "At 2:30 PM on August 7th, 2025, user with RFID card 'RFID12345678' started a charging session on connector 1, with meter reading starting at 0 kWh."</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-container">
+                        <h3><span class="step-number">5</span>Transaction Begins <button class="copy-btn" onclick="copyText('Transaction Begins')">📋 Copy</button></h3>
+                        <p><strong>What happens:</strong> The management system acknowledges the start and assigns a unique transaction ID. Power begins flowing to the vehicle.</p>
+                        <div class="highlight">
+                            <h4 style="color: #4facfe; margin-bottom: 10px;">🎫 Real-World Example:</h4>
+                            <p>Like getting a parking ticket when you enter a parking garage - the system gives you a unique number (transaction ID) to track your session from start to finish.</p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #667eea; margin-bottom: 10px;">What Happens Now:</h4>
+                            <p>• <strong>Unique ID Assigned:</strong> Transaction gets permanent tracking number</p>
+                            <p>• <strong>Power Delivery Starts:</strong> Electricity begins flowing to car</p>
+                            <p>• <strong>Meter Monitoring:</strong> Energy consumption tracking begins</p>
+                            <p>• <strong>Status Updates:</strong> Regular progress reports to management system</p>
+                            <p>• <strong>Billing Clock Starts:</strong> Customer charges begin accumulating</p>
+                        </div>
+                        
+                        <div style="margin-top: 30px;">
+                            <h3 style="color: #4facfe; margin-bottom: 15px;">📄 Example: Start Transaction Response</h3>
+                            <pre style="background: rgba(0,0,0,0.05); padding: 20px; border-radius: 8px; overflow-x: auto; font-family: 'Courier New', monospace; line-height: 1.4; border-left: 4px solid #27ae60;"><code>{
+  "messageType": "StartTransactionResponse",
+  "idTagInfo": {
+    "status": "Accepted"
+  },
+  "transactionId": 98765
+}</code></pre>
+                            <div style="margin-top: 15px; padding: 15px; background: rgba(39, 174, 96, 0.1); border-radius: 8px;">
+                                <p style="margin: 0; font-size: 0.9rem;"><strong>What this means:</strong> "Management system says: 'Authorization accepted, your charging session is now transaction #98765, you can start charging!'"</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>❌ What Can Go Wrong?</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="step-container" style="border-left-color: #e74c3c;">
+                        <h3>Authorization Failures <button class="copy-btn" onclick="copyText('Authorization Failures')">📋 Copy</button></h3>
+                        <div class="highlight" style="background: rgba(231, 76, 60, 0.1); border-left-color: #e74c3c;">
+                            <h4 style="color: #e74c3c; margin-bottom: 10px;">🚫 Common Issues:</h4>
+                            <p>• <strong>Invalid Card:</strong> RFID card not recognized or expired</p>
+                            <p>• <strong>Account Problems:</strong> User account suspended or no payment method</p>
+                            <p>• <strong>Network Issues:</strong> Can't reach authorization server</p>
+                            <p>• <strong>Card Reader Malfunction:</strong> Hardware not working properly</p>
+                        </div>
+                        <p><strong>Result:</strong> User sees "Authorization Failed" message and cannot start charging.</p>
+                    </div>
+
+                    <div class="step-container" style="border-left-color: #f39c12;">
+                        <h3>Connection Problems <button class="copy-btn" onclick="copyText('Connection Problems')">📋 Copy</button></h3>
+                        <div class="highlight" style="background: rgba(243, 156, 18, 0.1); border-left-color: #f39c12;">
+                            <h4 style="color: #f39c12; margin-bottom: 10px;">⚠️ Physical Issues:</h4>
+                            <p>• <strong>Loose Connection:</strong> Cable not properly inserted</p>
+                            <p>• <strong>Incompatible Connector:</strong> Wrong type of charging port</p>
+                            <p>• <strong>Vehicle Not Ready:</strong> Car's charging system has issues</p>
+                            <p>• <strong>Cable Damage:</strong> Charging cable has electrical problems</p>
+                        </div>
+                        <p><strong>Result:</strong> Charging cannot start even with valid authorization.</p>
+                    </div>
+
+                    <div class="step-container" style="border-left-color: #9b59b6;">
+                        <h3>System Errors <button class="copy-btn" onclick="copyText('System Errors')">📋 Copy</button></h3>
+                        <div class="highlight" style="background: rgba(155, 89, 182, 0.1); border-left-color: #9b59b6;">
+                            <h4 style="color: #9b59b6; margin-bottom: 10px;">🔧 Technical Problems:</h4>
+                            <p>• <strong>Connector Fault:</strong> Charging port has electrical issues</p>
+                            <p>• <strong>Communication Error:</strong> Can't reach management system</p>
+                            <p>• <strong>Power Supply Issue:</strong> Not enough electrical capacity available</p>
+                            <p>• <strong>Safety System Triggered:</strong> Emergency stop activated</p>
+                        </div>
+                        <p><strong>Result:</strong> Transaction may start but immediately fail or never begin.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>📚 Summary</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="highlight">
+                        <p><strong>Key Takeaway:</strong> Start Transaction is like the official "handshake" between user, charging station, and management system that begins a charging session. It ensures proper authorization, safety checks, and creates a trackable session for billing and monitoring.</p>
+                    </div>
+                    <div class="overview-grid">
+                        <div class="overview-card">
+                            <span class="icon">✅</span>
+                            <h3>What We Learned</h3>
+                            <p>• Start Transaction officially begins charging sessions<br>• Multiple steps ensure safety and proper authorization<br>• Creates unique transaction ID for tracking<br>• Can fail at several points for safety reasons</p>
+                        </div>
+                        <div class="overview-card">
+                            <span class="icon">🎯</span>
+                            <h3>Real-World Impact</h3>
+                            <p>• Enables secure access to charging<br>• Provides audit trail for billing<br>• Ensures safety before power delivery<br>• Allows remote monitoring and support</p>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 30px;">
+                        <a href="start_transaction_quiz.html" class="btn quiz" style="font-size: 1.1rem; padding: 15px 30px;">
+                            🧠 Ready to Test Your Knowledge? Take the Quiz! 
+                        </a>
+                        <a href="index.html" class="btn home" style="font-size: 1.1rem; padding: 15px 30px;">🏠 Back to Menu</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">
+        Copied to clipboard! ✅
+    </div>
+
+    <script>
+        function toggleSection(header) {
+            const content = header.nextElementSibling;
+            const toggle = header.querySelector('.toggle');
+            
+            header.classList.toggle('collapsed');
+            content.classList.toggle('collapsed');
+        }
+
+        function expandAll() {
+            const headers = document.querySelectorAll('.section-header');
+            const contents = document.querySelectorAll('.section-content');
+            
+            headers.forEach(header => header.classList.remove('collapsed'));
+            contents.forEach(content => content.classList.remove('collapsed'));
+        }
+
+        function collapseAll() {
+            const headers = document.querySelectorAll('.section-header');
+            const contents = document.querySelectorAll('.section-content');
+            
+            headers.forEach(header => header.classList.add('collapsed'));
+            contents.forEach(content => content.classList.add('collapsed'));
+        }
+
+        function copyText(stepName) {
+            const section = event.target.closest('.section');
+            const sectionTitle = section.querySelector('.section-header h2').textContent;
+            const copyText = `${sectionTitle} - ${stepName}`;
+            
+            navigator.clipboard.writeText(copyText).then(() => {
+                showToast();
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = copyText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast();
+            });
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Initialize with all sections collapsed
+        document.addEventListener('DOMContentLoaded', () => {
+            collapseAll();
+        });
+    </script>
+</body>
+</html>
