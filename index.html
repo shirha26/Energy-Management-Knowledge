@@ -504,6 +504,27 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
         }
+        @keyframes slideInRight {
+            from { 
+                transform: translateX(100%); 
+                opacity: 0; 
+            }
+            to { 
+                transform: translateX(0); 
+                opacity: 1; 
+            }
+        }
+
+        @keyframes slideOutRight {
+            from { 
+                transform: translateX(0); 
+                opacity: 1; 
+            }
+            to { 
+                transform: translateX(100%); 
+                opacity: 0; 
+            }
+        }
     </style>
 </head>
 <body>
@@ -714,8 +735,16 @@
         function getProgress() {
             const stored = localStorage.getItem('ocpp_progress');
             if (stored) {
-                return JSON.parse(stored);
-            }
+                const progress = JSON.parse(stored);
+                const defaultProgress = {
+                    meterValues: false,
+                    chargingProfiles: false,
+                    startTransaction: false,
+                    stopTransaction: false,
+                    statusNotifications: false
+            };
+            return { ...defaultProgress, ...progress };
+          }
             // defaultStage
             return {
                 meterValues: false,
@@ -725,7 +754,68 @@
                 statusNotifications: false
             };
         }
-        
+        // saveProgress
+        function saveProgress(moduleName, completed) {
+            const progress = getProgress();
+            progress[moduleName] = completed;
+            localStorage.setItem('ocpp_progress', JSON.stringify(progress));
+            updateProgressDisplay();
+        }
+
+        // markModuleCompleted 
+        function markModuleCompleted(moduleName) {
+            console.log('Module completed:', moduleName);
+            saveProgress(moduleName, true);
+    
+            // succesMSG
+            showCompletionMessage(moduleName);
+        }
+
+        // showCompletionMessage
+        function showCompletionMessage(moduleName) {
+            const moduleNames = {
+                'meterValues': 'Meter Values',
+                'chargingProfiles': 'Set Charging Profiles',
+                'startTransaction': 'Start Transaction',
+                'stopTransaction': 'Stop Transaction',
+                'statusNotifications': 'Status Notifications'
+            };
+    
+            const moduleName_display = moduleNames[moduleName] || moduleName;
+    
+            // notification
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+               position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                box-shadow: 0 10px 25px rgba(39, 174, 96, 0.3);
+                z-index: 1001;
+                animation: slideInRight 0.5s ease;
+            `;
+    
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.2rem;">🎉</span>
+                    <div>
+                        <div style="font-weight: bold;">Module Completed!</div>
+                        <div style="font-size: 0.9rem; opacity: 0.9;">${moduleName_display}</div>
+                    </div>
+                </div>
+            `;
+    
+            document.body.appendChild(notification);
+    
+            // 4secMsg
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.5s ease';
+                setTimeout(() => notification.remove(), 500);
+            }, 4000);
+        }
         // updateProgress
         function updateProgressDisplay() {
             const progress = getProgress();
@@ -834,7 +924,37 @@
             if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
                 localStorage.removeItem('ocpp_progress');
                 localStorage.removeItem('ocpp_first_visit_warning_shown');
-                location.reload(); 
+
+                const modules = document.querySelectorAll('.module-card');
+                modules.forEach(module => {
+                    module.classList.remove('completed');
+                });
+
+                updateProgressDisplay();
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+                    color: white;
+                    padding: 15px 25px;
+                    border-radius: 10px;
+                    box-shadow: 0 10px 25px rgba(231, 76, 60, 0.3);
+                    z-index: 1001;
+                `;
+                notification.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.2rem;">🔄</span>
+                        <div>
+                            <div style="font-weight: bold;">Progress Reset!</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">All modules cleared</div>
+                        </div>
+                    </div>
+                `;
+        
+                document.body.appendChild(notification);
+                setTimeout(() => notification.remove(), 3000);
             }
         }
         
