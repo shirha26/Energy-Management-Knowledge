@@ -766,6 +766,7 @@
             scoreDisplay.textContent = `${correctAnswers}/${totalQuestions} (${percentage}%)`;
             
             if (percentage >= 80) {
+                updateProgress('chargingProfiles');
                 scoreDisplay.className = 'score excellent';
                 feedbackText.textContent = '🎉 Excellent! You understand Set Charging Profiles perfectly!';
             } else if (percentage >= 60) {
