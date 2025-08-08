@@ -875,6 +875,17 @@
                 updateProgress('statusNotifications');
                 scoreDisplay.className = 'score excellent';
                 feedbackText.textContent = '🎉 Excellent! You understand Status Notifications perfectly!';
+                try {
+                    if (window.parent && typeof window.parent.markModuleCompleted === 'function') {
+                        window.parent.markModuleCompleted('statusNotifications');
+                    } else if (typeof markModuleCompleted === 'function') {
+                        markModuleCompleted('statusNotifications');
+                    } else if (window.markModuleCompleted) {
+                        window.markModuleCompleted('statusNotifications');
+                    }
+                } catch (error) {
+                    console.log('Could not mark module completed:', error);
+                }
             } else if (percentage >= 60) {
                 scoreDisplay.className = 'score good';
                 feedbackText.textContent = '👍 Good job! You grasp the basics. Review the explanations to master the details.';
