@@ -820,6 +820,18 @@
                 updateProgress('startTransaction');
                 scoreDisplay.className = 'score excellent';
                 feedbackText.textContent = '🎉 Excellent! You understand Start Transaction perfectly!';
+                    // Mark start transaction module as completed
+                try {
+                    if (window.parent && typeof window.parent.markModuleCompleted === 'function') {
+                        window.parent.markModuleCompleted('startTransaction');
+                    } else if (typeof markModuleCompleted === 'function') {
+                        markModuleCompleted('startTransaction');
+                    } else if (window.markModuleCompleted) {
+                        window.markModuleCompleted('startTransaction');
+                    }
+                } catch (error) {
+                    console.log('Could not mark module completed:', error);
+                }
             } else if (percentage >= 60) {
                 scoreDisplay.className = 'score good';
                 feedbackText.textContent = '👍 Good job! You grasp the basics. Review the explanations to master the details.';
