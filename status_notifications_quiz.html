@@ -872,6 +872,7 @@
             scoreDisplay.textContent = `${correctAnswers}/${totalQuestions} (${percentage}%)`;
             
             if (percentage >= 80) {
+                updateProgress('statusNotifications');
                 scoreDisplay.className = 'score excellent';
                 feedbackText.textContent = '🎉 Excellent! You understand Status Notifications perfectly!';
             } else if (percentage >= 60) {
@@ -927,6 +928,22 @@
             currentQuestions = generateRandomQuestions();
             renderQuestions();
         });
+        // updateLclStrg
+        function updateProgress(moduleName) {
+        const progress = JSON.parse(localStorage.getItem('ocpp_progress') || '{}') || {
+            meterValues: false,
+            chargingProfiles: false,
+            startTransaction: false,
+            stopTransaction: false,
+            statusNotifications: false
+        };
+    
+        progress[moduleName] = true;
+    
+        localStorage.setItem('ocpp_progress', JSON.stringify(progress));
+    
+        console.log('Progress updated:', progress); 
+    }
     </script>
 </body>
 </html>
