@@ -413,6 +413,97 @@
                 padding: 20px 15px;
             }
         }
+                
+        /* completedModuleStyle*/
+        .module-card.completed {
+                border: 2px solid #27ae60;
+                background: linear-gradient(135deg, rgba(39, 174, 96, 0.1) 0%, rgba(46, 204, 113, 0.05) 100%);
+                position: relative;
+        }
+
+            .module-card.completed::before {
+                content: "✅ Completed";
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+                color: white;
+                padding: 5px 12px;
+                border-radius: 15px;
+                font-size: 0.8rem;
+                font-weight: bold;
+                z-index: 2;
+        }
+
+        /*alertMsg*/
+            .warning-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+                animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .warning-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .warning-content h3 {
+            color: #e67e22;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .warning-content ul {
+            text-align: left;
+            margin: 15px 0;
+            padding-left: 20px;
+        }
+
+        .warning-content li {
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .warning-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .warning-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -461,7 +552,7 @@
             </div>
 
             <div class="modules-grid">
-                <div class="module-card">
+                <div class="module-card" id="meter-values-module">
                     <div class="module-header">
                         <span class="icon">📊</span>
                         <h3>Meter Values</h3>
@@ -484,7 +575,7 @@
                     </div>
                 </div>
 
-                <div class="module-card">
+                <div class="module-card" id="charging-profiles-module">
                     <div class="module-header">
                         <span class="icon">🔧</span>
                         <h3>Set Charging Profiles</h3>
@@ -507,7 +598,7 @@
                     </div>
                 </div>
 
-                <div class="module-card">
+                <div class="module-card" id="start-transaction-module">
                     <div class="module-header">
                         <span class="icon">🚀</span>
                         <h3>Start Transaction</h3>
@@ -530,7 +621,7 @@
                     </div>
                 </div>
 
-                <div class="module-card">
+                <div class="module-card" id="stop-transaction-module">
                     <div class="module-header">
                         <span class="icon">🛑</span>
                         <h3>Stop Transaction</h3>
@@ -553,7 +644,7 @@
                     </div>
                 </div>
 
-                <div class="module-card">
+                <div class="module-card" id="status-notifications-module">
                     <div class="module-header">
                         <span class="icon">📡</span>
                         <h3>Status Notifications</h3>
@@ -599,7 +690,7 @@
                     </div>
                 </div>
             </div>
-  <!--      </div>
+        </div>
 
             <div class="footer-section"> 
             <h3>🎯 Learning Progress</h3>
@@ -608,11 +699,158 @@
                 <div class="progress-bar">
                     <div class="progress-fill"></div>
                 </div>
-                <p style="margin: 0; color: #4facfe; font-weight: 600;">2 of 5 modules completed (40%)</p>
-                <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9rem;">Complete all available modules to master the fundamentals!</p>
+                <p class="progress-text" style="margin: 0; color: #4facfe; font-weight: 600;">0 of 5 modules completed (0%)</p>
+                <p class="progress-subtext" style="margin: 5px 0 0 0; color: #666; font-size: 0.9rem;">Complete all quizzes with 80%+ to master the fundamentals!</p>
+            </div>
+            <button onclick="resetProgress()" style="background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 15px; margin-top: 15px; cursor: pointer; font-size: 0.8rem;">
+                🔄 Reset Progress 
+            </button>
             </div>
         </div> 
-    </div> -->
+    </div>
+    
+    <script>
+        // progressTolclstg
+        function getProgress() {
+            const stored = localStorage.getItem('ocpp_progress');
+            if (stored) {
+                return JSON.parse(stored);
+            }
+            // defaultStage
+            return {
+                meterValues: false,
+                chargingProfiles: false,
+                startTransaction: false,
+                stopTransaction: false,
+                statusNotifications: false
+            };
+        }
+        
+        // updateProgress
+        function updateProgressDisplay() {
+            const progress = getProgress();
+            const completed = Object.values(progress).filter(Boolean).length;
+            const total = Object.keys(progress).length;
+            const percentage = Math.round((completed / total) * 100);
+            
+            // updateBar
+            const progressFill = document.querySelector('.progress-fill');
+            if (progressFill) {
+                progressFill.style.width = percentage + '%';
+            }
+            
+            // updateTxt
+            const progressText = document.querySelector('.progress-text');
+            if (progressText) {
+                progressText.textContent = `${completed} of ${total} modules completed (${percentage}%)`;
+            }
+            
+            const progressSubtext = document.querySelector('.progress-subtext');
+            if (progressSubtext) {
+                if (percentage === 100) {
+                    progressSubtext.textContent = "🎉 Congratulations! You've mastered all the fundamentals!";
+                    progressSubtext.style.color = "#27ae60";
+                } else {
+                    progressSubtext.textContent = "Complete all quizzes with 80%+ to master the fundamentals!";
+                    progressSubtext.style.color = "#666";
+                }
+            }
+            
+            // updateBtn
+            updateModuleStates(progress);
+        }
+        
+        // completed/notCompleted
+        function updateModuleStates(progress) {
+            const modules = {
+                meterValues: 'meter-values-module',
+                chargingProfiles: 'charging-profiles-module',
+                startTransaction: 'start-transaction-module',
+                stopTransaction: 'stop-transaction-module',
+                statusNotifications: 'status-notifications-module'
+            };
+            
+            Object.keys(modules).forEach(key => {
+                const moduleElement = document.getElementById(modules[key]);
+                if (moduleElement && progress[key]) {
+                    moduleElement.classList.add('completed');
+                }
+            });
+        }
+        
+        // firstTimeAlert
+        function showFirstTimeWarning() {
+            const modal = document.createElement('div');
+            modal.className = 'warning-modal';
+            modal.innerHTML = `
+                <div class="warning-content">
+                    <h3>📋 Important Notice</h3>
+                    <p style="color: #555; margin-bottom: 15px;">
+                        Your quiz progress will be saved on this device only.
+                    </p>
+                    <p style="color: #333; font-weight: 600; margin-bottom: 10px;">
+                        To keep your progress:
+                    </p>
+                    <ul>
+                        <li>Use the same browser and device</li>
+                        <li>Don't clear browser data or cookies</li>
+                        <li>Consider bookmarking this page</li>
+                        <li>Complete quizzes with 80%+ score</li>
+                    </ul>
+                    <p style="color: #e67e22; font-size: 0.9rem; margin-top: 15px;">
+                        ⚠️ If you use a different device or clear browser data, you'll need to retake the quizzes.
+                    </p>
+                    <button class="warning-btn" onclick="closeWarning(this)">
+                        I Understand - Let's Start!
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        
+        // closeAlert
+        function closeWarning(button) {
+            const modal = button.closest('.warning-modal');
+            modal.style.animation = 'fadeOut 0.3s ease';
+            setTimeout(() => {
+                modal.remove();
+            }, 300);
+            
+            localStorage.setItem('ocpp_first_visit_warning_shown', 'true');
+        }
+        
+        // fadeOut
+        const style = document.createElement('style');
+        style.textContent = `
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        `;
+        document.head.appendChild(style);
+        
+        // resetProgress
+        function resetProgress() {
+            if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+                localStorage.removeItem('ocpp_progress');
+                localStorage.removeItem('ocpp_first_visit_warning_shown');
+                location.reload(); 
+            }
+        }
+        
+        // runUpdate
+        document.addEventListener('DOMContentLoaded', function() {
+            // UpdateProgressBar
+            updateProgressDisplay();
+            
+            // firatTimeCheck
+            const warningShown = localStorage.getItem('ocpp_first_visit_warning_shown');
+            if (!warningShown) {
+                setTimeout(showFirstTimeWarning, 500);
+            }
+        });
+        </script>
+
 </body>
 </html>
             
