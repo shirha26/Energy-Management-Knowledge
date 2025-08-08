@@ -405,7 +405,7 @@
             </div>
 
             <div class="controls">
-                <button class="btn" onclick="" id="submitBtn">📝 Submit Quiz</button>
+                <button class="btn" onclick="submitQuiz()" id="submitBtn">📝 Submit Quiz</button>
                 <button class="btn secondary" onclick="generateNewQuiz()" id="newQuizBtn">🎲 New Random Quiz</button>
                 <button class="btn secondary" onclick="resetQuiz()" id="resetBtn">🔄 Reset Current Quiz</button>
             </div>
@@ -705,9 +705,7 @@
 
             scoreDisplay.textContent = `${correctAnswers}/${totalQuestions} (${percentage}%)`;
             
-            if (percentage >= 80) {
-                updateProgress('meterValues');
-                
+            if (percentage >= 80) {            
                 scoreDisplay.className = 'score excellent';
                 feedbackText.textContent = '🎉 Excellent! You have a solid understanding of OCPP meter values!';
                 // Mark meter values module as completed
@@ -775,22 +773,7 @@
             currentQuestions = generateRandomQuestions();
             renderQuestions();
         });
-        // updateLclStrg
-function updateProgress(moduleName) {
-    const progress = JSON.parse(localStorage.getItem('ocpp_progress') || '{}') || {
-        meterValues: false,
-        chargingProfiles: false,
-        startTransaction: false,
-        stopTransaction: false,
-        statusNotifications: false
-    };
     
-    progress[moduleName] = true;
-    
-    localStorage.setItem('ocpp_progress', JSON.stringify(progress));
-    
-    console.log('Progress updated:', progress); 
-}
     </script>
 </body>
 </html>
