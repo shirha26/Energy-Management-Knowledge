@@ -1,0 +1,1790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driivz Customer Personas - QA Testing Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Arial', sans-serif;
+            background: #f5f5f5;
+            color: #2c3e50;
+            line-height: 1.8;
+            padding: 40px 20px;
+            font-size: 16px;
+            font-weight: 300;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: #ffffff;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
+        }
+
+        header {
+            background: #ffffff;
+            color: #2c3e50;
+            padding: 60px 40px 50px;
+            text-align: center;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        header h1 {
+            font-size: 2.2em;
+            margin-bottom: 15px;
+            font-weight: 300;
+            letter-spacing: -0.5px;
+        }
+
+        header p {
+            font-size: 1em;
+            color: #7f8c8d;
+            font-weight: 300;
+        }
+
+        .controls {
+            background: #fafafa;
+            padding: 25px 40px;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: 1px solid #d0d0d0;
+            border-radius: 2px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 400;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #ffffff;
+            color: #2c3e50;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-primary {
+            background: #2c3e50;
+            color: white;
+            border-color: #2c3e50;
+        }
+
+        .btn-primary:hover {
+            background: #1a252f;
+            border-color: #1a252f;
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            color: #2c3e50;
+        }
+
+        .btn-secondary:hover {
+            background: #f5f5f5;
+        }
+
+        .btn-ocpp {
+            background: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+
+        .btn-ocpp:hover {
+            background: #45a049;
+            border-color: #45a049;
+        }
+
+        /* Scroll to Top Button */
+        .scroll-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #2c3e50;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            border: none;
+            font-size: 24px;
+        }
+
+        .scroll-to-top:hover {
+            background: #1a252f;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .scroll-to-top.show {
+            display: flex;
+        }
+
+        .content {
+            padding: 50px 60px;
+        }
+
+        .purpose-section {
+            background: #fafafa;
+            padding: 40px;
+            margin-bottom: 50px;
+            border-left: 3px solid #2c3e50;
+        }
+
+        .purpose-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            font-weight: 400;
+            letter-spacing: -0.3px;
+        }
+
+        .purpose-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .purpose-section li {
+            padding: 10px 0;
+            padding-left: 25px;
+            position: relative;
+            color: #5a6c7d;
+        }
+
+        .purpose-section li:before {
+            content: "—";
+            position: absolute;
+            left: 0;
+            color: #2c3e50;
+            font-weight: 400;
+        }
+
+        .persona-card {
+            background: white;
+            border: 1px solid #e8e8e8;
+            padding: 40px;
+            margin-bottom: 30px;
+            transition: all 0.2s ease;
+        }
+
+        .persona-card:hover {
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .persona-card.collapsed .collapsible-content {
+            display: none;
+        }
+
+        .persona-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            margin-bottom: 25px;
+        }
+
+        .persona-title {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .persona-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4em;
+            color: #2c3e50;
+            background: #f5f5f5;
+            font-weight: 300;
+        }
+
+        .icon-1 { background: #e8eaf0; color: #4a5568; }
+        .icon-2 { background: #f0e8ea; color: #5a4548; }
+        .icon-3 { background: #e8f0f2; color: #485a5f; }
+        .icon-4 { background: #e8f2ea; color: #48594a; }
+        .icon-5 { background: #f2eee8; color: #5f5548; }
+
+        .persona-card h3 {
+            color: #2c3e50;
+            font-size: 1.4em;
+            margin: 0;
+            font-weight: 400;
+            letter-spacing: -0.3px;
+        }
+
+        .toggle-icon {
+            font-size: 1.2em;
+            transition: transform 0.2s ease;
+            color: #95a5a6;
+        }
+
+        .persona-card.collapsed .toggle-icon {
+            transform: rotate(-90deg);
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+            padding: 30px;
+            background: #fafafa;
+        }
+
+        .profile-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .profile-label {
+            font-weight: 400;
+            color: #7f8c8d;
+            font-size: 0.85em;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .profile-value {
+            color: #2c3e50;
+            font-size: 0.95em;
+            font-weight: 300;
+        }
+
+        .section {
+            margin: 35px 0;
+        }
+
+        .section h4 {
+            color: #2c3e50;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e8e8e8;
+            font-weight: 400;
+            letter-spacing: -0.2px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 2px;
+            font-size: 0.8em;
+            font-weight: 400;
+            margin: 5px 8px 5px 0;
+            border: 1px solid #e8e8e8;
+            letter-spacing: 0.3px;
+        }
+
+        .badge-primary {
+            background: #f5f5f5;
+            color: #2c3e50;
+            border-color: #d0d0d0;
+        }
+
+        .badge-success {
+            background: #f5f9f7;
+            color: #2c5440;
+            border-color: #d0e0d8;
+        }
+
+        .badge-warning {
+            background: #f9f7f5;
+            color: #543a2c;
+            border-color: #e0d8d0;
+        }
+
+        .badge-info {
+            background: #f5f7f9;
+            color: #2c4054;
+            border-color: #d0d8e0;
+        }
+
+        .test-scenario {
+            background: #fafafa;
+            border-left: 2px solid #2c3e50;
+            padding: 18px 22px;
+            margin: 12px 0;
+            font-size: 0.95em;
+        }
+
+        .pain-point {
+            background: #fafafa;
+            border-left: 2px solid #95a5a6;
+            padding: 18px 22px;
+            margin: 12px 0;
+            font-size: 0.95em;
+        }
+
+        ul, ol {
+            padding-left: 25px;
+            margin: 20px 0;
+        }
+
+        li {
+            margin: 10px 0;
+            color: #5a6c7d;
+        }
+
+        .checklist {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .checklist li {
+            padding: 14px 20px;
+            margin: 8px 0;
+            background: #fafafa;
+            padding-left: 45px;
+            position: relative;
+            border-left: 2px solid transparent;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .checklist li:hover {
+            border-left-color: #2c3e50;
+            background: #f0f0f0;
+        }
+
+        .checklist li:before {
+            content: "☐";
+            position: absolute;
+            left: 18px;
+            font-size: 1.1em;
+            color: #95a5a6;
+            transition: all 0.2s ease;
+        }
+
+        .checklist li.checked:before {
+            content: "☑";
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .checklist li.checked {
+            background: #f5f9f7;
+            border-left-color: #2c5440;
+        }
+
+        .cross-persona {
+            background: #fafafa;
+            padding: 40px;
+            margin: 40px 0;
+            border-left: 3px solid #2c3e50;
+        }
+
+        .cross-persona h3 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-weight: 400;
+            letter-spacing: -0.3px;
+        }
+
+        .workflow {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border: 1px solid #e8e8e8;
+        }
+
+        .workflow-title {
+            font-weight: 400;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .workflow-steps {
+            color: #5a6c7d;
+            font-size: 0.95em;
+            font-weight: 300;
+        }
+
+        .ocpp-section {
+            background: #fafafa;
+            padding: 30px;
+            margin: 25px 0;
+            border: 1px solid #e8e8e8;
+        }
+
+        .ocpp-section h4 {
+            color: #2c3e50;
+            margin-bottom: 18px;
+            border-bottom: none;
+        }
+
+        .copy-btn {
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 2px;
+            cursor: pointer;
+            font-size: 0.8em;
+            margin-left: 12px;
+            transition: all 0.2s ease;
+            letter-spacing: 0.3px;
+        }
+
+        .copy-btn:hover {
+            background: #1a252f;
+        }
+
+        .copy-notification {
+            display: none;
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: #2c3e50;
+            color: white;
+            padding: 18px 28px;
+            border-radius: 2px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            font-weight: 300;
+            letter-spacing: 0.3px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .copy-notification.show {
+            display: block;
+        }
+
+        footer {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 40px;
+            text-align: center;
+            font-weight: 300;
+        }
+
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .footer-content h3 {
+            font-weight: 400;
+            margin-bottom: 20px;
+            letter-spacing: -0.3px;
+        }
+
+        .footer-content p {
+            opacity: 0.85;
+            font-weight: 300;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 10px;
+            }
+
+            .content {
+                padding: 30px 25px;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .persona-title {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .scroll-to-top {
+                bottom: 20px;
+                right: 20px;
+                width: 45px;
+                height: 45px;
+            }
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin: 25px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border: 1px solid #e8e8e8;
+        }
+
+        th, td {
+            padding: 16px 18px;
+            text-align: left;
+            border-bottom: 1px solid #e8e8e8;
+            font-weight: 300;
+        }
+
+        th {
+            background: #fafafa;
+            color: #2c3e50;
+            font-weight: 400;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover {
+            background: #fafafa;
+        }
+
+        code {
+            background: #f5f5f5;
+            padding: 3px 8px;
+            border-radius: 2px;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Courier New', monospace;
+            color: #2c3e50;
+            font-size: 0.9em;
+            border: 1px solid #e8e8e8;
+        }
+    </style>
+</head>
+<body>
+    <div class="copy-notification" id="copyNotification">
+        ✓ Copied to clipboard!
+    </div>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-to-top" id="scrollToTop" onclick="scrollToTop()">
+        ↑
+    </button>
+
+    <div class="container">
+        <header>
+            <h1>🎯 Driivz Customer Personas</h1>
+            <p>QA Testing Guide - Understanding Our Users</p>
+        </header>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="expandAll()">
+                <span>📂</span> Expand All
+            </button>
+            <button class="btn btn-primary" onclick="collapseAll()">
+                <span>📁</span> Collapse All
+            </button>
+            <button class="btn btn-secondary" onclick="copyPageUrl()">
+                <span>🔗</span> Copy Page Link
+            </button>
+            <button class="btn btn-ocpp" onclick="goToOCPP()">
+                <span>⚡</span> Go to OCPP Learning
+            </button>
+        </div>
+
+        <div class="content">
+            <div class="purpose-section">
+                <h2>🎓 Purpose for QA Teams</h2>
+                <p style="margin-bottom: 15px;">This guide helps QA engineers understand our customers' perspectives, needs, and workflows. Use these personas to:</p>
+                <ul>
+                    <li>Design realistic test scenarios</li>
+                    <li>Validate user flows from the customer's viewpoint</li>
+                    <li>Identify edge cases based on real usage patterns</li>
+                    <li>Ensure features meet actual customer needs</li>
+                </ul>
+            </div>
+
+            <!-- Persona 1: Site Manager -->
+            <div class="persona-card collapsed" id="persona1">
+                <div class="persona-header" onclick="togglePersona('persona1')">
+                    <div class="persona-title">
+                        <div class="persona-icon icon-1">👔</div>
+                        <h3>Persona 1: Site Manager (Fleet Operator)
+                            <button class="copy-btn" onclick="event.stopPropagation(); copySection('persona1', 'Site Manager')">Copy</button>
+                        </h3>
+                    </div>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="collapsible-content">
+                    <div class="profile-grid">
+                        <div class="profile-item">
+                            <span class="profile-label">Role</span>
+                            <span class="profile-value">Manages charging infrastructure for commercial fleet</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Company Size</span>
+                            <span class="profile-value">50-500 vehicles</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Tech Savviness</span>
+                            <span class="profile-value">Moderate</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Primary Goal</span>
+                            <span class="profile-value">Maximize uptime, minimize operational costs</span>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h4>📋 Key Responsibilities</h4>
+                        <ul>
+                            <li>Monitor charger availability and status</li>
+                            <li>Schedule maintenance and repairs</li>
+                            <li>Manage driver access and permissions</li>
+                            <li>Generate usage reports for management</li>
+                        </ul>
+                    </div>
+
+                    <div class="section">
+                        <h4>🎯 Testing Focus Areas</h4>
+                        <p><strong>OP (Operator Portal):</strong></p>
+                        <div>
+                            <span class="badge badge-primary">Charger status monitoring</span>
+                            <span class="badge badge-primary">User access management</span>
+                            <span class="badge badge-primary">Reporting functionality</span>
+                            <span class="badge badge-primary">Maintenance scheduling</span>
+                        </div>
+
+                        <h4 style="margin-top: 20px;">🧪 Test Scenarios</h4>
+                        <div class="test-scenario">
+                            <strong>Scenario 1:</strong> Multiple chargers going offline simultaneously
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 2:</strong> Bulk user permission changes
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 3:</strong> Report generation during peak usage times
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 4:</strong> Emergency maintenance workflows
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h4>⚠️ Pain Points to Test</h4>
+                        <div class="pain-point">
+                            <strong>❌ Delayed status updates</strong> causing operational issues
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Complex user permission systems</strong>
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Incomplete or inaccurate reporting data</strong>
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Difficulty identifying problematic chargers</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Persona 2: EV Driver -->
+            <div class="persona-card collapsed" id="persona2">
+                <div class="persona-header" onclick="togglePersona('persona2')">
+                    <div class="persona-title">
+                        <div class="persona-icon icon-2">🚗</div>
+                        <h3>Persona 2: EV Driver (End User)
+                            <button class="copy-btn" onclick="event.stopPropagation(); copySection('persona2', 'EV Driver')">Copy</button>
+                        </h3>
+                    </div>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="collapsible-content">
+                    <div class="profile-grid">
+                        <div class="profile-item">
+                            <span class="profile-label">Role</span>
+                            <span class="profile-value">Employee using company charging infrastructure</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Tech Savviness</span>
+                            <span class="profile-value">Varies (Low to High)</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Primary Goal</span>
+                            <span class="profile-value">Charge vehicle quickly and easily</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Device</span>
+                            <span class="profile-value">Primarily mobile (DP - Driver Portal)</span>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h4>📋 Key Activities</h4>
+                        <ul>
+                            <li>Find available charging stations</li>
+                            <li>Start/stop charging sessions</li>
+                            <li>Monitor charging progress</li>
+                            <li>Review charging history and costs</li>
+                        </ul>
+                    </div>
+
+                    <div class="section">
+                        <h4>🎯 Testing Focus Areas</h4>
+                        <p><strong>DP (Driver Portal):</strong></p>
+                        <div>
+                            <span class="badge badge-info">Station availability</span>
+                            <span class="badge badge-info">Session start/stop flows</span>
+                            <span class="badge badge-info">Real-time charging status</span>
+                            <span class="badge badge-info">Payment visibility</span>
+                        </div>
+
+                        <h4 style="margin-top: 20px;">🧪 Test Scenarios</h4>
+                        <div class="test-scenario">
+                            <strong>Scenario 1:</strong> Poor network connectivity during session start
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 2:</strong> Cable disconnection scenarios (<code>StopTransactionOnEVSideDisconnect</code>)
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 3:</strong> Reservation conflicts
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 4:</strong> Multiple authentication methods (RFID, mobile app)
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h4>⚠️ Pain Points to Test</h4>
+                        <div class="pain-point">
+                            <strong>❌ Unclear error messages</strong>
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Slow app response times</strong>
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Confusing charging status indicators</strong>
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Issues with session termination</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Persona 3: CPO Administrator -->
+            <div class="persona-card collapsed" id="persona3">
+                <div class="persona-header" onclick="togglePersona('persona3')">
+                    <div class="persona-title">
+                        <div class="persona-icon icon-3">⚡</div>
+                        <h3>Persona 3: CPO Administrator (Charge Point Operator)
+                            <button class="copy-btn" onclick="event.stopPropagation(); copySection('persona3', 'CPO Administrator')">Copy</button>
+                        </h3>
+                    </div>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="collapsible-content">
+                    <div class="profile-grid">
+                        <div class="profile-item">
+                            <span class="profile-label">Role</span>
+                            <span class="profile-value">Oversees entire charging network operations</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Company Size</span>
+                            <span class="profile-value">100+ charging locations</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Tech Savviness</span>
+                            <span class="profile-value">High</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Primary Goal</span>
+                            <span class="profile-value">Network reliability and revenue optimization</span>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h4>📋 Key Responsibilities</h4>
+                        <ul>
+                            <li>Configure pricing and access policies</li>
+                            <li>Monitor network health and performance</li>
+                            <li>Manage smart charging strategies</li>
+                            <li>Analyze business metrics</li>
+                        </ul>
+                    </div>
+
+                    <div class="section">
+                        <h4>🎯 Testing Focus Areas</h4>
+                        <p><strong>OP (Operator Portal):</strong></p>
+                        <div>
+                            <span class="badge badge-success">Network-wide configuration</span>
+                            <span class="badge badge-success">Smart charging profiles</span>
+                            <span class="badge badge-success">Advanced reporting</span>
+                            <span class="badge badge-success">External integrations</span>
+                        </div>
+
+                        <h4 style="margin-top: 20px;">🧪 Test Scenarios</h4>
+                        <div class="test-scenario">
+                            <strong>Scenario 1:</strong> Bulk configuration changes across locations
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 2:</strong> Load balancing and smart charging profiles (OCPP 1.6 Smart Charging)
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 3:</strong> Real-time pricing adjustments
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 4:</strong> API integrations and data exports
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h4>⚠️ Pain Points to Test</h4>
+                        <div class="pain-point">
+                            <strong>❌ Configuration changes not propagating correctly</strong>
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Smart charging logic conflicts</strong>
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Data inconsistencies across reports</strong>
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Performance issues with large datasets</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Persona 4: Maintenance Technician -->
+            <div class="persona-card collapsed" id="persona4">
+                <div class="persona-header" onclick="togglePersona('persona4')">
+                    <div class="persona-title">
+                        <div class="persona-icon icon-4">🔧</div>
+                        <h3>Persona 4: Maintenance Technician
+                            <button class="copy-btn" onclick="event.stopPropagation(); copySection('persona4', 'Maintenance Technician')">Copy</button>
+                        </h3>
+                    </div>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="collapsible-content">
+                    <div class="profile-grid">
+                        <div class="profile-item">
+                            <span class="profile-label">Role</span>
+                            <span class="profile-value">Field technician responsible for charger repairs</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Tech Savviness</span>
+                            <span class="profile-value">Moderate to High</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Primary Goal</span>
+                            <span class="profile-value">Quick diagnosis and resolution</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Device</span>
+                            <span class="profile-value">Mobile (DP) and laptop (OP)</span>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h4>📋 Key Activities</h4>
+                        <ul>
+                            <li>Receive and respond to maintenance alerts</li>
+                            <li>Diagnose charger issues remotely</li>
+                            <li>Access diagnostic logs and data</li>
+                            <li>Update charger status post-repair</li>
+                        </ul>
+                    </div>
+
+                    <div class="section">
+                        <h4>🎯 Testing Focus Areas</h4>
+                        <p><strong>OP & DP:</strong></p>
+                        <div>
+                            <span class="badge badge-warning">Diagnostic tools</span>
+                            <span class="badge badge-warning">Remote troubleshooting</span>
+                            <span class="badge badge-warning">Status notifications</span>
+                            <span class="badge badge-warning">Firmware updates</span>
+                        </div>
+
+                        <h4 style="margin-top: 20px;">🧪 Test Scenarios</h4>
+                        <div class="test-scenario">
+                            <strong>Scenario 1:</strong> Various <code>ChargePointErrorCode</code> conditions
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 2:</strong> Diagnostic data retrieval (<code>GetDiagnostics</code>)
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 3:</strong> Firmware update success/failure scenarios (<code>UpdateFirmware</code>)
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 4:</strong> Offline charger troubleshooting
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h4>⚠️ Pain Points to Test</h4>
+                        <div class="pain-point">
+                            <strong>❌ Insufficient diagnostic information</strong>
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Delayed error notifications</strong>
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Inability to perform remote operations</strong>
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Missing or unclear maintenance logs</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Persona 5: Property Manager -->
+            <div class="persona-card collapsed" id="persona5">
+                <div class="persona-header" onclick="togglePersona('persona5')">
+                    <div class="persona-title">
+                        <div class="persona-icon icon-5">🏢</div>
+                        <h3>Persona 5: Property Manager (Location Host)
+                            <button class="copy-btn" onclick="event.stopPropagation(); copySection('persona5', 'Property Manager')">Copy</button>
+                        </h3>
+                    </div>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="collapsible-content">
+                    <div class="profile-grid">
+                        <div class="profile-item">
+                            <span class="profile-label">Role</span>
+                            <span class="profile-value">Manages charging amenities for tenants/customers</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Property Type</span>
+                            <span class="profile-value">Commercial building, retail, hospitality</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Tech Savviness</span>
+                            <span class="profile-value">Low to Moderate</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Primary Goal</span>
+                            <span class="profile-value">Provide charging as a service/amenity</span>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h4>📋 Key Responsibilities</h4>
+                        <ul>
+                            <li>Ensure chargers are operational</li>
+                            <li>Manage access for tenants/guests</li>
+                            <li>Monitor usage and costs</li>
+                            <li>Handle customer complaints</li>
+                        </ul>
+                    </div>
+
+                    <div class="section">
+                        <h4>🎯 Testing Focus Areas</h4>
+                        <p><strong>OP (Operator Portal):</strong></p>
+                        <div>
+                            <span class="badge badge-primary">Simple dashboards</span>
+                            <span class="badge badge-primary">Guest access provisioning</span>
+                            <span class="badge badge-primary">Basic usage reporting</span>
+                            <span class="badge badge-primary">Customer support tools</span>
+                        </div>
+
+                        <h4 style="margin-top: 20px;">🧪 Test Scenarios</h4>
+                        <div class="test-scenario">
+                            <strong>Scenario 1:</strong> Temporary user authorization
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 2:</strong> Reservation management (<code>ReserveNow</code>)
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 3:</strong> Simple troubleshooting workflows
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 4:</strong> Cost allocation by tenant/department
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h4>⚠️ Pain Points to Test</h4>
+                        <div class="pain-point">
+                            <strong>❌ Overly complex interfaces</strong>
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Difficulty managing temporary access</strong>
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Limited visibility into issues</strong>
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Unclear cost breakdown</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Persona 6: Energy Manager -->
+            <div class="persona-card collapsed" id="persona6">
+                <div class="persona-header" onclick="togglePersona('persona6')">
+                    <div class="persona-title">
+                        <div class="persona-icon icon-1">⚙️</div>
+                        <h3>Persona 6: Energy Manager
+                            <button class="copy-btn" onclick="event.stopPropagation(); copySection('persona6', 'Energy Manager')">Copy</button>
+                        </h3>
+                    </div>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="collapsible-content">
+                    <div class="profile-grid">
+                        <div class="profile-item">
+                            <span class="profile-label">Role</span>
+                            <span class="profile-value">Optimizes energy consumption and grid integration</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Company Size</span>
+                            <span class="profile-value">Large enterprise or utility</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Tech Savviness</span>
+                            <span class="profile-value">High</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Primary Goal</span>
+                            <span class="profile-value">Optimize energy costs and grid load</span>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h4>📋 Key Responsibilities</h4>
+                        <ul>
+                            <li>Monitor and optimize energy consumption</li>
+                            <li>Implement demand response programs</li>
+                            <li>Manage smart charging schedules</li>
+                            <li>Coordinate with utility companies</li>
+                            <li>Analyze energy usage patterns and costs</li>
+                        </ul>
+                    </div>
+
+                    <div class="section">
+                        <h4>🎯 Testing Focus Areas</h4>
+                        <p><strong>OP (Operator Portal):</strong></p>
+                        <div>
+                            <span class="badge badge-success">Smart charging profiles</span>
+                            <span class="badge badge-success">Load management</span>
+                            <span class="badge badge-success">Energy analytics</span>
+                            <span class="badge badge-success">Grid integration</span>
+                        </div>
+
+                        <h4 style="margin-top: 20px;">🧪 Test Scenarios</h4>
+                        <div class="test-scenario">
+                            <strong>Scenario 1:</strong> Configure <code>ChargePointMaxProfile</code> for load balancing
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 2:</strong> Set time-based charging profiles (<code>TxDefaultProfile</code>)
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 3:</strong> Peak demand management during grid stress
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 4:</strong> Energy consumption reporting and forecasting
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 5:</strong> <code>GetCompositeSchedule</code> validation
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h4>⚠️ Pain Points to Test</h4>
+                        <div class="pain-point">
+                            <strong>❌ Charging profile conflicts and resolution</strong>
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Inaccurate energy consumption data</strong>
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Delayed response to grid events</strong>
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Complex smart charging configuration</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Persona 7: Finance/Billing Manager -->
+            <div class="persona-card collapsed" id="persona7">
+                <div class="persona-header" onclick="togglePersona('persona7')">
+                    <div class="persona-title">
+                        <div class="persona-icon icon-2">💰</div>
+                        <h3>Persona 7: Finance/Billing Manager
+                            <button class="copy-btn" onclick="event.stopPropagation(); copySection('persona7', 'Finance Manager')">Copy</button>
+                        </h3>
+                    </div>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="collapsible-content">
+                    <div class="profile-grid">
+                        <div class="profile-item">
+                            <span class="profile-label">Role</span>
+                            <span class="profile-value">Manages billing, invoicing, and financial reporting</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Company Size</span>
+                            <span class="profile-value">Varies</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Tech Savviness</span>
+                            <span class="profile-value">Moderate</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Primary Goal</span>
+                            <span class="profile-value">Accurate billing and revenue tracking</span>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h4>📋 Key Responsibilities</h4>
+                        <ul>
+                            <li>Generate and validate invoices</li>
+                            <li>Monitor transaction data and revenue</li>
+                            <li>Handle billing disputes and adjustments</li>
+                            <li>Integrate with accounting systems</li>
+                            <li>Manage pricing and tariff configurations</li>
+                        </ul>
+                    </div>
+
+                    <div class="section">
+                        <h4>🎯 Testing Focus Areas</h4>
+                        <p><strong>OP (Operator Portal):</strong></p>
+                        <div>
+                            <span class="badge badge-warning">Transaction reporting</span>
+                            <span class="badge badge-warning">Billing accuracy</span>
+                            <span class="badge badge-warning">Pricing configuration</span>
+                            <span class="badge badge-warning">Financial exports</span>
+                        </div>
+
+                        <h4 style="margin-top: 20px;">🧪 Test Scenarios</h4>
+                        <div class="test-scenario">
+                            <strong>Scenario 1:</strong> Validate <code>MeterValues</code> accuracy for billing
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 2:</strong> Transaction data completeness (<code>StartTransaction</code>, <code>StopTransaction</code>)
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 3:</strong> Billing for interrupted transactions
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 4:</strong> Multi-tariff pricing scenarios
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 5:</strong> Financial report generation and export
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h4>⚠️ Pain Points to Test</h4>
+                        <div class="pain-point">
+                            <strong>❌ Missing or incomplete transaction data</strong>
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Meter value discrepancies</strong>
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Complex pricing rule configuration</strong>
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Delayed transaction reporting</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Persona 8: Customer Support Agent -->
+            <div class="persona-card collapsed" id="persona8">
+                <div class="persona-header" onclick="togglePersona('persona8')">
+                    <div class="persona-title">
+                        <div class="persona-icon icon-3">🎧</div>
+                        <h3>Persona 8: Customer Support Agent
+                            <button class="copy-btn" onclick="event.stopPropagation(); copySection('persona8', 'Customer Support Agent')">Copy</button>
+                        </h3>
+                    </div>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="collapsible-content">
+                    <div class="profile-grid">
+                        <div class="profile-item">
+                            <span class="profile-label">Role</span>
+                            <span class="profile-value">Assists end users with charging issues</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Company Size</span>
+                            <span class="profile-value">Varies</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Tech Savviness</span>
+                            <span class="profile-value">Low to Moderate</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Primary Goal</span>
+                            <span class="profile-value">Quick issue resolution and customer satisfaction</span>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h4>📋 Key Responsibilities</h4>
+                        <ul>
+                            <li>Respond to customer inquiries and complaints</li>
+                            <li>Troubleshoot charging session issues</li>
+                            <li>Assist with account and payment problems</li>
+                            <li>Escalate technical issues to appropriate teams</li>
+                            <li>Document customer interactions</li>
+                        </ul>
+                    </div>
+
+                    <div class="section">
+                        <h4>🎯 Testing Focus Areas</h4>
+                        <p><strong>OP (Operator Portal):</strong></p>
+                        <div>
+                            <span class="badge badge-info">User lookup</span>
+                            <span class="badge badge-info">Transaction history</span>
+                            <span class="badge badge-info">Remote operations</span>
+                            <span class="badge badge-info">Issue tracking</span>
+                        </div>
+
+                        <h4 style="margin-top: 20px;">🧪 Test Scenarios</h4>
+                        <div class="test-scenario">
+                            <strong>Scenario 1:</strong> Unlock stuck connector (<code>UnlockConnector</code>)
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 2:</strong> Stop stuck transaction (<code>RemoteStopTransaction</code>)
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 3:</strong> View user's transaction history
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 4:</strong> Investigate failed authorization
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 5:</strong> Handle billing dispute with transaction data
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h4>⚠️ Pain Points to Test</h4>
+                        <div class="pain-point">
+                            <strong>❌ Difficulty finding user information quickly</strong>
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Lack of real-time charger status</strong>
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Insufficient troubleshooting tools</strong>
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Complex interface requiring too much training</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Persona 9: System Administrator -->
+            <div class="persona-card collapsed" id="persona9">
+                <div class="persona-header" onclick="togglePersona('persona9')">
+                    <div class="persona-title">
+                        <div class="persona-icon icon-4">🖥️</div>
+                        <h3>Persona 9: System Administrator
+                            <button class="copy-btn" onclick="event.stopPropagation(); copySection('persona9', 'System Administrator')">Copy</button>
+                        </h3>
+                    </div>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="collapsible-content">
+                    <div class="profile-grid">
+                        <div class="profile-item">
+                            <span class="profile-label">Role</span>
+                            <span class="profile-value">Manages system configuration and integrations</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Company Size</span>
+                            <span class="profile-value">Medium to Large</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Tech Savviness</span>
+                            <span class="profile-value">Very High</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Primary Goal</span>
+                            <span class="profile-value">System stability and optimal configuration</span>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h4>📋 Key Responsibilities</h4>
+                        <ul>
+                            <li>Configure system-wide settings</li>
+                            <li>Manage user roles and permissions</li>
+                            <li>Oversee system integrations and APIs</li>
+                            <li>Monitor system health and performance</li>
+                            <li>Handle firmware and software updates</li>
+                            <li>Ensure data security and compliance</li>
+                        </ul>
+                    </div>
+
+                    <div class="section">
+                        <h4>🎯 Testing Focus Areas</h4>
+                        <p><strong>OP (Operator Portal):</strong></p>
+                        <div>
+                            <span class="badge badge-primary">Configuration management</span>
+                            <span class="badge badge-primary">User administration</span>
+                            <span class="badge badge-primary">API management</span>
+                            <span class="badge badge-primary">System monitoring</span>
+                        </div>
+
+                        <h4 style="margin-top: 20px;">🧪 Test Scenarios</h4>
+                        <div class="test-scenario">
+                            <strong>Scenario 1:</strong> Bulk configuration changes (<code>ChangeConfiguration</code>)
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 2:</strong> Configuration key validation (<code>GetConfiguration</code>)
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 3:</strong> Firmware update rollout (<code>UpdateFirmware</code>)
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 4:</strong> Local authorization list management (<code>SendLocalList</code>)
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 5:</strong> System reset and recovery (<code>Reset</code>)
+                        </div>
+                        <div class="test-scenario">
+                            <strong>Scenario 6:</strong> Role-based access control testing
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h4>⚠️ Pain Points to Test</h4>
+                        <div class="pain-point">
+                            <strong>❌ Configuration changes requiring system restart</strong>
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Lack of configuration validation before apply</strong>
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Complex permission management</strong>
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Insufficient system monitoring and alerting</strong>
+                        </div>
+                        <div class="pain-point">
+                            <strong>❌ Firmware update failures and rollback issues</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cross-Persona Testing -->
+            <div class="cross-persona">
+                <h3>🔄 Cross-Persona Testing Scenarios</h3>
+                
+                <div class="section">
+                    <h4>Multi-User Workflows</h4>
+                    
+                    <div class="workflow">
+                        <div class="workflow-title">1. Session Handoff</div>
+                        <div class="workflow-steps">Driver starts session → Site Manager monitors → Technician diagnoses issue</div>
+                    </div>
+
+                    <div class="workflow">
+                        <div class="workflow-title">2. Authorization Chain</div>
+                        <div class="workflow-steps">CPO configures access → Site Manager assigns users → Driver authenticates</div>
+                    </div>
+
+                    <div class="workflow">
+                        <div class="workflow-title">3. Maintenance Flow</div>
+                        <div class="workflow-steps">System detects fault → Technician receives alert → Site Manager updated</div>
+                    </div>
+                </div>
+
+                <div class="ocpp-section">
+                    <h4>📡 OCPP Protocol Testing</h4>
+                    <p>Based on OCPP 1.6 specification, test these critical flows across personas:</p>
+                    
+                    <div style="margin-top: 15px;">
+                        <strong>Authorization (Section 4.1)</strong>
+                        <ul>
+                            <li>Local vs. remote authorization</li>
+                            <li>Offline behavior with Authorization Cache</li>
+                            <li>Parent idTag scenarios</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-top: 15px;">
+                        <strong>Transaction Management (Sections 4.8, 4.10)</strong>
+                        <ul>
+                            <li><code>StartTransaction</code> with various scenarios</li>
+                            <li><code>StopTransaction</code> reasons</li>
+                            <li>Transaction data reporting</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-top: 15px;">
+                        <strong>Smart Charging (Section 3.12)</strong>
+                        <ul>
+                            <li><code>ChargingProfile</code> management</li>
+                            <li>Load balancing scenarios</li>
+                            <li>Profile conflicts and resolution</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-top: 15px;">
+                        <strong>Status Management (Section 4.9)</strong>
+                        <ul>
+                            <li>All <code>ChargePointStatus</code> transitions</li>
+                            <li>Error condition handling</li>
+                            <li>Connector-specific vs. Charge Point status</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QA Testing Checklist -->
+            <div class="section" style="background: #f8f9fa; padding: 30px; border-radius: 10px; margin-top: 30px;">
+                <h3 style="color: #5e72e4; margin-bottom: 20px;">✅ QA Testing Checklist by Persona</h3>
+                <p><strong>For Each Persona, Verify:</strong></p>
+
+                <h4 style="margin-top: 25px; color: #2d3748;">Functional Requirements</h4>
+                <ul class="checklist" data-checklist="functional">
+                    <li data-item="functional-1">All primary workflows complete successfully</li>
+                    <li data-item="functional-2">Error handling matches user expectations</li>
+                    <li data-item="functional-3">UI/UX appropriate for tech savviness level</li>
+                    <li data-item="functional-4">Device compatibility (mobile/desktop)</li>
+                </ul>
+
+                <h4 style="margin-top: 25px; color: #2d3748;">OCPP Compliance</h4>
+                <ul class="checklist" data-checklist="ocpp">
+                    <li data-item="ocpp-1">Relevant OCPP messages handled correctly</li>
+                    <li data-item="ocpp-2">Status updates reflect actual charge point state</li>
+                    <li data-item="ocpp-3">Authorization flows work as specified</li>
+                    <li data-item="ocpp-4">Transaction data accurate and complete</li>
+                </ul>
+
+                <h4 style="margin-top: 25px; color: #2d3748;">Performance</h4>
+                <ul class="checklist" data-checklist="performance">
+                    <li data-item="performance-1">Response times acceptable for user's needs</li>
+                    <li data-item="performance-2">System handles expected concurrent users</li>
+                    <li data-item="performance-3">Real-time updates occur within SLA</li>
+                </ul>
+
+                <h4 style="margin-top: 25px; color: #2d3748;">Edge Cases</h4>
+                <ul class="checklist" data-checklist="edge">
+                    <li data-item="edge-1">Network interruption scenarios</li>
+                    <li data-item="edge-2">Concurrent user actions</li>
+                    <li data-item="edge-3">System recovery procedures</li>
+                    <li data-item="edge-4">Data consistency across personas</li>
+                </ul>
+            </div>
+
+            <!-- Test Data Requirements -->
+            <div class="section" style="background: #e6f7ff; padding: 30px; border-radius: 10px; margin-top: 30px; border: 2px solid #1890ff;">
+                <h3 style="color: #1890ff; margin-bottom: 20px;">🗃️ Test Data Requirements</h3>
+                
+                <h4 style="color: #2d3748; margin-top: 20px;">Maintain Test Accounts For:</h4>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Account Type</th>
+                                <th>Description</th>
+                                <th>Key Characteristics</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>New Driver</strong></td>
+                                <td>Minimal history</td>
+                                <td>No previous transactions, first-time user experience</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Experienced Driver</strong></td>
+                                <td>Extensive history</td>
+                                <td>100+ transactions, multiple locations</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Site Manager (Small)</strong></td>
+                                <td>Small fleet</td>
+                                <td>5-10 chargers, 20-30 drivers</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Site Manager (Large)</strong></td>
+                                <td>Large fleet</td>
+                                <td>50+ chargers, 200+ drivers</td>
+                            </tr>
+                            <tr>
+                                <td><strong>CPO Admin</strong></td>
+                                <td>Multi-site access</td>
+                                <td>Full network control, all features enabled</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Technician</strong></td>
+                                <td>Maintenance permissions</td>
+                                <td>Diagnostic access, limited configuration rights</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Property Manager</strong></td>
+                                <td>Limited permissions</td>
+                                <td>Basic monitoring, guest access only</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h4 style="color: #2d3748; margin-top: 30px;">Test Environment Chargers:</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 15px;">
+                    <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <strong>✅ Available</strong>
+                        <p style="font-size: 0.9em; color: #4a5568; margin-top: 5px;">Ready for charging</p>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <strong>🔄 Charging</strong>
+                        <p style="font-size: 0.9em; color: #4a5568; margin-top: 5px;">Active transactions</p>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <strong>⚠️ Faulted</strong>
+                        <p style="font-size: 0.9em; color: #4a5568; margin-top: 5px;">Various error states</p>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <strong>🔌 Different Types</strong>
+                        <p style="font-size: 0.9em; color: #4a5568; margin-top: 5px;">Various connector types</p>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <strong>⚡ Smart Charging</strong>
+                        <p style="font-size: 0.9em; color: #4a5568; margin-top: 5px;">Enabled/disabled</p>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <strong>📡 Offline</strong>
+                        <p style="font-size: 0.9em; color: #4a5568; margin-top: 5px;">Communication issues</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documentation Guidelines -->
+            <div class="section" style="background: #fff5f5; padding: 30px; border-radius: 10px; margin-top: 30px; border-left: 5px solid #fc8181;">
+                <h3 style="color: #e53e3e; margin-bottom: 20px;">📝 Documentation for QA</h3>
+                <p style="margin-bottom: 15px;"><strong>When testing, document:</strong></p>
+                <ol style="line-height: 2;">
+                    <li><strong>Which persona</strong> you're testing as</li>
+                    <li><strong>Their goals</strong> in the workflow</li>
+                    <li><strong>Expected behavior</strong> from their perspective</li>
+                    <li><strong>Pain points</strong> discovered</li>
+                    <li><strong>OCPP messages</strong> involved (if applicable)</li>
+                </ol>
+                <p style="margin-top: 20px; padding: 15px; background: white; border-radius: 5px; font-style: italic;">
+                    💡 <strong>Remember:</strong> This helps ensure we're not just testing features, but validating real user experiences.
+                </p>
+            </div>
+
+        </div>
+
+        <footer>
+            <div class="footer-content">
+                <h3 style="margin-bottom: 15px;">🎯 Testing Best Practices</h3>
+                <p style="margin-bottom: 10px;">Always approach testing from the user's perspective</p>
+                <p style="margin-bottom: 10px;">Validate OCPP compliance for all charging operations</p>
+                <p style="margin-bottom: 10px;">Document findings clearly with persona context</p>
+                <p style="margin-top: 20px; opacity: 0.8;">
+                    Driivz QA Team - Understanding Our Customers
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // LocalStorage key for checklist items
+        const STORAGE_KEY = 'driivz_personas_checklist';
+
+        // Load checked items from localStorage
+        function loadChecklistState() {
+            const savedState = localStorage.getItem(STORAGE_KEY);
+            if (savedState) {
+                const checkedItems = JSON.parse(savedState);
+                checkedItems.forEach(itemId => {
+                    const item = document.querySelector(`[data-item="${itemId}"]`);
+                    if (item) {
+                        item.classList.add('checked');
+                    }
+                });
+            }
+        }
+
+        // Save checked items to localStorage
+        function saveChecklistState() {
+            const checkedItems = [];
+            document.querySelectorAll('.checklist li.checked').forEach(item => {
+                const itemId = item.getAttribute('data-item');
+                if (itemId) {
+                    checkedItems.push(itemId);
+                }
+            });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(checkedItems));
+        }
+
+        // Toggle individual persona
+        function togglePersona(id) {
+            const card = document.getElementById(id);
+            card.classList.toggle('collapsed');
+        }
+
+        // Expand all personas
+        function expandAll() {
+            const cards = document.querySelectorAll('.persona-card');
+            cards.forEach(card => card.classList.remove('collapsed'));
+        }
+
+        // Collapse all personas
+        function collapseAll() {
+            const cards = document.querySelectorAll('.persona-card');
+            cards.forEach(card => card.classList.add('collapsed'));
+        }
+
+        // Copy section content
+        function copySection(personaId, personaName) {
+            const card = document.getElementById(personaId);
+            const content = card.querySelector('.collapsible-content');
+            
+            // Get all text content
+            let textContent = `${personaName}\n\n`;
+            
+            // Get profile information
+            const profileItems = content.querySelectorAll('.profile-item');
+            profileItems.forEach(item => {
+                const label = item.querySelector('.profile-label').textContent;
+                const value = item.querySelector('.profile-value').textContent;
+                textContent += `${label}: ${value}\n`;
+            });
+            
+            textContent += '\n';
+            
+            // Get section content
+            const sections = content.querySelectorAll('.section');
+            sections.forEach(section => {
+                const heading = section.querySelector('h4');
+                if (heading) {
+                    textContent += `\n${heading.textContent}\n`;
+                }
+                const lists = section.querySelectorAll('ul, ol');
+                lists.forEach(list => {
+                    const items = list.querySelectorAll('li');
+                    items.forEach(item => {
+                        textContent += `- ${item.textContent}\n`;
+                    });
+                });
+                
+                const scenarios = section.querySelectorAll('.test-scenario, .pain-point');
+                scenarios.forEach(scenario => {
+                    textContent += `${scenario.textContent}\n`;
+                });
+            });
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(textContent).then(() => {
+                showNotification();
+            });
+        }
+
+        // Copy page URL
+        function copyPageUrl() {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                showNotification();
+            });
+        }
+
+        // Show copy notification
+        function showNotification() {
+            const notification = document.getElementById('copyNotification');
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2000);
+        }
+
+        // Scroll to top function
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // Show/hide scroll to top button
+        function handleScroll() {
+            const scrollButton = document.getElementById('scrollToTop');
+            if (window.pageYOffset > 300) {
+                scrollButton.classList.add('show');
+            } else {
+                scrollButton.classList.remove('show');
+            }
+        }
+
+        // Go to OCPP Learning page
+        function goToOCPP() {
+            window.location.href = 'index.html';
+        }
+
+        // Initialize checklist functionality
+        function initializeChecklists() {
+            const checklistItems = document.querySelectorAll('.checklist li');
+            checklistItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    this.classList.toggle('checked');
+                    saveChecklistState();
+                });
+            });
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            // Start with all personas collapsed
+            collapseAll();
+            
+            // Load checklist state from localStorage
+            loadChecklistState();
+            
+            // Initialize checklist click handlers
+            initializeChecklists();
+        });
+
+        // Add scroll event listener
+        window.addEventListener('scroll', handleScroll);
+    </script>
+</body>
+</html>
