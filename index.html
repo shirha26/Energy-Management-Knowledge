@@ -525,6 +525,64 @@
                 opacity: 0; 
             }
         }
+        .navigation-bar {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 15px 40px;
+    border-bottom: 1px solid rgba(79, 172, 254, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+}
+
+.nav-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-decoration: none;
+    padding: 12px 25px;
+    border-radius: 25px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.nav-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.nav-icon {
+    font-size: 1.2rem;
+}
+
+.nav-text {
+    font-size: 0.95rem;
+}
+
+.personas-btn {
+    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+    box-shadow: 0 4px 15px rgba(44, 62, 80, 0.3);
+}
+
+.personas-btn:hover {
+    background: linear-gradient(135deg, #1a252f 0%, #2980b9 100%);
+    box-shadow: 0 6px 20px rgba(44, 62, 80, 0.4);
+}
+
+/* Responsive styles for mobile */
+@media (max-width: 768px) {
+    .navigation-bar {
+        padding: 12px 20px;
+    }
+    
+    .nav-btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+}
     </style>
 </head>
 <body>
@@ -533,7 +591,12 @@
             <h1>⚡ OCPP 1.6 Protocol Guide</h1>
             <p>Complete learning resource for understanding electric vehicle charging communication</p>
         </div>
-
+    <div class="navigation-bar">
+        <a href="driivz_personas_forqa.html" class="nav-btn personas-btn">
+            <span class="nav-icon">👥</span>
+            <span class="nav-text">Learn about Driivz personas</span>
+        </a>
+    </div>
         <div class="intro-section">
             <div class="intro-content">
                 <h2>🤔 What is OCPP 1.6 and Why Do We Need It?</h2>
